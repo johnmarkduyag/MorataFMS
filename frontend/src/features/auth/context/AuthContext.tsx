@@ -1,5 +1,5 @@
+import { createContext, useEffect, useState, useContext } from 'react';
 import type { ReactNode } from 'react';
-import { createContext, useEffect, useState } from 'react';
 import { authApi } from '../api/authApi';
 import type { AuthState, LoginCredentials, User } from '../types/auth.types';
 
@@ -11,7 +11,15 @@ interface AuthContextType extends AuthState {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Export the context so it can be used in custom hooks
+// Export hook for usage
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
+};
+
 export { AuthContext };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -46,7 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (credentials: LoginCredentials) => {
     try {
       const response = await authApi.login(credentials);
-      
+
       // Store user only - authentication is via session cookie
       localStorage.setItem('user', JSON.stringify(response.user));
 
@@ -69,7 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       // Clear local storage and state
       localStorage.removeItem('user');
-      
+
       setAuthState({
         user: null,
         isAuthenticated: false,
