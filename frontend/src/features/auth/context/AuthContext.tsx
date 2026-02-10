@@ -46,7 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (credentials: LoginCredentials) => {
     try {
       const response = await authApi.login(credentials);
-      
+
       // Store user only - authentication is via session cookie
       localStorage.setItem('user', JSON.stringify(response.user));
 
@@ -69,7 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       // Clear local storage and state
       localStorage.removeItem('user');
-      
+
       setAuthState({
         user: null,
         isAuthenticated: false,

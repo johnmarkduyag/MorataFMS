@@ -1,93 +1,81 @@
-//import { useLocation } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Logo } from "../../../components/Logo";
 import { LoginForm } from "./LoginForm";
 
 export const LoginPage = () => {
-  //const location = useLocation();
+  const [isAnimating, setIsAnimating] = useState(false);
+  const navigate = useNavigate();
 
-  // Toast disabled per user request until role system is established
-  // useEffect(() => {
-  //   if (location.state?.from) {
-  //     toast.error("Please log in to access that page.", {
-  //       id: "auth-required", // Prevent duplicates
-  //       duration: 4000,
-  //     });
-  //   }
-  // }, [location]);
+  const goToSignup = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    setIsAnimating(true);
+
+    // Navigate after animation completes
+    setTimeout(() => {
+      navigate('/signup');
+    }, 600);
+  };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#0A1929]">
-      {/* Professional Background Pattern */}
-      <div className="absolute inset-0">
-        {/* Diagonal lines pattern */}
-        <div 
-          className="absolute inset-0 opacity-5"
-          style={{
-            backgroundImage: `repeating-linear-gradient(
-              45deg,
-              transparent,
-              transparent 35px,
-              rgba(255, 255, 255, 0.1) 35px,
-              rgba(255, 255, 255, 0.1) 70px
-            )`
-          }}
-        />
-        
-        {/* Subtle red accent glow - top right */}
-        <div 
-          className="absolute top-0 right-0 w-96 h-96 bg-red-600 rounded-full mix-blend-soft-light filter blur-3xl opacity-20"
-        />
-        
-        {/* Subtle blue accent glow - bottom left */}
-        <div 
-          className="absolute bottom-0 left-0 w-96 h-96 bg-blue-600 rounded-full mix-blend-soft-light filter blur-3xl opacity-20"
-        />
-      </div>
-
+    <div className="bg-[#e8e8e8] min-h-screen flex flex-col">
       {/* Main Content */}
-      <div className="relative min-h-screen flex items-center justify-center p-4">
-        {/* Glassmorphism Card */}
-        <div 
-          className="w-full max-w-md"
-          style={{ animation: 'fade-in 0.8s ease-out' }}
-        >
-          <div className="backdrop-blur-xl bg-white/5 rounded-3xl shadow-2xl border border-white/10 p-8 md:p-10">
-            {/* Logo/Brand Section */}
-            <div className="text-center mb-8">
-              {/* FM Morata Logo */}
-              <div className="inline-flex items-center justify-center mb-6">
-                <div className="text-center">
-                  <h1 className="text-4xl font-bold mb-1">
-                    <span className="text-red-500">F.M. MORATA</span>
-                  </h1>
-                  <p className="text-blue-400 text-sm font-semibold tracking-wide">
-                    Customs Brokerage and Law Firm
-                  </p>
-                </div>
-              </div>
-              
-              <div className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent mb-6"></div>
+      <main className="flex-1 flex items-center justify-center px-16 py-12">
+        <div className="relative overflow-hidden bg-white rounded-sm shadow-md w-full max-w-[850px] h-[500px] flex">
+
+          {/* Login Form (Left) */}
+          <div
+            className={`w-1/2 px-14 py-10 flex flex-col transition-opacity duration-[600ms] ease-in-out ${isAnimating ? 'opacity-0' : 'opacity-100'}`}
+          >
+            {/* Logo */}
+            <div className="flex justify-center mb-8">
+              <Logo />
+            </div>
+
+            {/* Welcome Text */}
+            <div className="text-center mb-6">
+              <h1 className="text-2xl font-bold text-gray-900 mb-1">Welcome!</h1>
+              <p className="text-gray-500 text-xs">Your work, your team, your flow — all in one place.</p>
             </div>
 
             {/* Login Form */}
             <LoginForm />
 
+            {/* Sign Up Link */}
+            <div className="text-center">
+              <span className="text-gray-500 text-xs">Don't have an account? </span>
+              <a
+                href="#"
+                onClick={goToSignup}
+                className="text-gray-900 font-medium text-xs hover:underline"
+              >
+                Sign Up
+              </a>
+            </div>
+
             {/* Footer Links */}
-            <div className="mt-6 text-center">
-              <p className="text-white/50 text-sm">
-                Need access?{' '}
-                <a href="#" className="text-red-400 font-semibold hover:text-red-300 transition-colors">
-                  Contact Administrator
-                </a>
-              </p>
+            <div className="flex justify-center items-center space-x-3 text-xs text-gray-400 mt-auto">
+              <a href="#" className="hover:text-gray-600">Help</a>
+              <span>/</span>
+              <a href="#" className="hover:text-gray-600">Terms</a>
+              <span>/</span>
+              <a href="#" className="hover:text-gray-600">Privacy</a>
             </div>
           </div>
 
-          {/* Subtle bottom text */}
-          <p className="text-center text-white/40 text-xs mt-6">
-            © 2026 F.M. Morata Customs Brokerage and Law Firm. All rights reserved.
-          </p>
+          {/* Blue Panel */}
+          <div
+            style={{ transition: 'transform 600ms cubic-bezier(0.4, 0.0, 0.2, 1)' }}
+            className={`absolute top-0 right-0 w-1/2 h-full bg-[#1a2332] z-10 ${isAnimating ? 'translate-x-full' : 'translate-x-0'}`}
+          />
         </div>
-      </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="bg-black text-white px-8 py-5 flex justify-between">
+        <span className="text-[10px] font-semibold tracking-widest">FOOTER</span>
+        <span className="text-[10px] font-semibold tracking-widest">FOOTER</span>
+      </footer>
     </div>
   );
 };
