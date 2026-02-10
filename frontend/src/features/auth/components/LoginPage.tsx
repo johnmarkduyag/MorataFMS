@@ -1,6 +1,19 @@
+import { useLocation } from "react-router-dom";
 import { LoginForm } from "./LoginForm";
 
 export const LoginPage = () => {
+  const location = useLocation();
+
+  // Toast disabled per user request until role system is established
+  // useEffect(() => {
+  //   if (location.state?.from) {
+  //     toast.error("Please log in to access that page.", {
+  //       id: "auth-required", // Prevent duplicates
+  //       duration: 4000,
+  //     });
+  //   }
+  // }, [location]);
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#0A1929]">
       {/* Professional Background Pattern */}

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
 export const LoginForm = () => {
@@ -11,6 +11,10 @@ export const LoginForm = () => {
   
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // effective redirection target
+  const from = location.state?.from?.pathname || "/dashboard";
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -19,8 +23,8 @@ export const LoginForm = () => {
     
     try {
       await login({ email, password, rememberMe });
-      // Navigate to dashboard on successful login
-      navigate('/dashboard');
+      // Navigate to original destination or dashboard
+      navigate(from, { replace: true });
     } catch (err: unknown) { // Changed 'any' to 'unknown'
       console.error("Login failed:", err);
       let errorMessage = "An unexpected error occurred. Please try again.";

@@ -1,12 +1,12 @@
 import api from '../../../lib/axios';
 import type { AuthResponse, LoginCredentials, User } from '../types/auth.types';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
 
 export const authApi = {
     // Get CSRF cookie (required before login)
     async getCsrfCookie(): Promise<void> {
-        await api.get(`${API_URL}/sanctum/csrf-cookie`);
+        await api.get('/sanctum/csrf-cookie');
     },
 
     // Login user

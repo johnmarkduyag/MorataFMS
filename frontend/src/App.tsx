@@ -1,17 +1,31 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
-import { Dashboard } from './components/Dashboard';
-import { AuthProvider } from './features/auth';
+import { Toaster } from 'sonner';
+import { NotFoundPage } from './components/NotFoundPage';
+import { AuthProvider, GuestRoute, ProtectedRoute } from './features/auth';
 import { LoginPage } from './features/auth/components/LoginPage';
+import { Dashboard } from './features/dashboard';
 
 function App() {
   return (
     <AuthProvider>
+      <Toaster richColors position="top-right" />
       <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        {/* Redirect root ("/") to login for now */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
-        {/* TODO: Add other protected routes */}
+        {/* Guest-only routes (redirect to dashboard if already logged in) */}
+        <Route element={<GuestRoute />}>
+          <Route path="/login" element={<LoginPage />} />
+        </Route>
+
+        {/* Protected routes (redirect to login if not authenticated) */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+        </Route>
+
+        {/* Public Routes */}
+        {/* Note: We use 404 masking (GitHub style) instead of explicit 403 pages */}
+        
+        {/* Default redirects & 404 */}
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </AuthProvider>
   );
