@@ -1,8 +1,9 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
 export const SignupForm = ({ onToggleLogin }: { onToggleLogin: () => void }) => {
+    const location = useLocation();
     const [formData, setFormData] = useState({
         first_name: "",
         last_name: "",
@@ -15,6 +16,23 @@ export const SignupForm = ({ onToggleLogin }: { onToggleLogin: () => void }) => 
 
     const { register } = useAuth();
     const navigate = useNavigate();
+
+    // Clear fields when switching away from signup (wait for panel cover)
+    useEffect(() => {
+        if (location.pathname !== "/signup") {
+            const timer = setTimeout(() => {
+                setFormData({
+                    first_name: "",
+                    last_name: "",
+                    email: "",
+                    password: "",
+                    password_confirmation: ""
+                });
+                setError(null);
+            }, 600);
+            return () => clearTimeout(timer);
+        }
+    }, [location.pathname]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData(prev => ({
@@ -69,7 +87,7 @@ export const SignupForm = ({ onToggleLogin }: { onToggleLogin: () => void }) => 
                         name="first_name"
                         placeholder="First Name"
                         required
-                        className="w-1/2 px-4 py-2.5 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent text-xs bg-white text-gray-900"
+                        className="w-1/2 px-4 py-2.5 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent text-xs bg-white text-gray-900 disabled:cursor-not-allowed disabled:bg-gray-50"
                         value={formData.first_name}
                         onChange={handleChange}
                         disabled={isLoading}
@@ -79,7 +97,7 @@ export const SignupForm = ({ onToggleLogin }: { onToggleLogin: () => void }) => 
                         name="last_name"
                         placeholder="Last Name"
                         required
-                        className="w-1/2 px-4 py-2.5 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent text-xs bg-white text-gray-900"
+                        className="w-1/2 px-4 py-2.5 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent text-xs bg-white text-gray-900 disabled:cursor-not-allowed disabled:bg-gray-50"
                         value={formData.last_name}
                         onChange={handleChange}
                         disabled={isLoading}
@@ -93,7 +111,7 @@ export const SignupForm = ({ onToggleLogin }: { onToggleLogin: () => void }) => 
                         name="email"
                         placeholder="Email"
                         required
-                        className="w-full px-4 py-2.5 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent text-xs bg-white text-gray-900"
+                        className="w-full px-4 py-2.5 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent text-xs bg-white text-gray-900 disabled:cursor-not-allowed disabled:bg-gray-50"
                         value={formData.email}
                         onChange={handleChange}
                         disabled={isLoading}
@@ -107,7 +125,7 @@ export const SignupForm = ({ onToggleLogin }: { onToggleLogin: () => void }) => 
                         name="password"
                         placeholder="Enter Password"
                         required
-                        className="w-full px-4 py-2.5 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent text-xs bg-white text-gray-900"
+                        className="w-full px-4 py-2.5 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent text-xs bg-white text-gray-900 disabled:cursor-not-allowed disabled:bg-gray-50"
                         value={formData.password}
                         onChange={handleChange}
                         disabled={isLoading}
@@ -121,7 +139,7 @@ export const SignupForm = ({ onToggleLogin }: { onToggleLogin: () => void }) => 
                         name="password_confirmation"
                         placeholder="Confirm your Password"
                         required
-                        className="w-full px-4 py-2.5 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent text-xs bg-white text-gray-900"
+                        className="w-full px-4 py-2.5 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent text-xs bg-white text-gray-900 disabled:cursor-not-allowed disabled:bg-gray-50"
                         value={formData.password_confirmation}
                         onChange={handleChange}
                         disabled={isLoading}
@@ -150,11 +168,12 @@ export const SignupForm = ({ onToggleLogin }: { onToggleLogin: () => void }) => 
                 <span className="text-gray-500 text-xs">Already have an account? </span>
                 <button
                     type="button"
+                    disabled={isLoading}
                     onClick={(e) => {
                         e.preventDefault();
                         onToggleLogin();
                     }}
-                    className="text-gray-900 font-medium text-xs hover:underline"
+                    className="text-gray-900 font-medium text-xs hover:underline disabled:cursor-not-allowed disabled:no-underline disabled:text-gray-400"
                 >
                     Log in
                 </button>

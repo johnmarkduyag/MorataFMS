@@ -39,7 +39,7 @@ export const AuthPage = () => {
                     <div className="flex w-full relative">
                         {/* Login Form (Left) */}
                         <div
-                            className={`w-full md:w-1/2 px-8 py-10 md:px-14 flex flex-col transition-opacity duration-500 ${isLogin ? "opacity-100 z-0" : "opacity-0 -z-10 absolute left-0"
+                            className={`w-full md:w-1/2 px-8 py-10 md:px-14 flex flex-col ${isLogin ? "flex" : "hidden md:flex"
                                 }`}
                         >
                             {/* Logo */}
@@ -73,7 +73,7 @@ export const AuthPage = () => {
 
                         {/* Signup Form (Right) */}
                         <div
-                            className={`w-full md:w-1/2 ml-auto px-8 py-8 md:px-10 flex flex-col transition-opacity duration-500 ${!isLogin ? "opacity-100 z-0" : "opacity-0 -z-10 absolute right-0"
+                            className={`w-full md:w-1/2 px-8 py-8 md:px-10 flex flex-col ${!isLogin ? "flex" : "hidden md:flex"
                                 }`}
                         >
                             {/* Logo */}
