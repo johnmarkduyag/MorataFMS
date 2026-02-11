@@ -87,7 +87,7 @@ export const SignupForm = ({ onToggleLogin }: { onToggleLogin: () => void }) => 
                         name="first_name"
                         placeholder="First Name"
                         required
-                        className="w-1/2 px-4 py-2.5 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent text-xs bg-white text-gray-900 disabled:cursor-not-allowed disabled:bg-gray-50"
+                        className="w-1/2 px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent text-xs bg-white text-gray-900 disabled:cursor-not-allowed disabled:bg-gray-50"
                         value={formData.first_name}
                         onChange={handleChange}
                         disabled={isLoading}
@@ -97,7 +97,7 @@ export const SignupForm = ({ onToggleLogin }: { onToggleLogin: () => void }) => 
                         name="last_name"
                         placeholder="Last Name"
                         required
-                        className="w-1/2 px-4 py-2.5 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent text-xs bg-white text-gray-900 disabled:cursor-not-allowed disabled:bg-gray-50"
+                        className="w-1/2 px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent text-xs bg-white text-gray-900 disabled:cursor-not-allowed disabled:bg-gray-50"
                         value={formData.last_name}
                         onChange={handleChange}
                         disabled={isLoading}
@@ -111,7 +111,7 @@ export const SignupForm = ({ onToggleLogin }: { onToggleLogin: () => void }) => 
                         name="email"
                         placeholder="Email"
                         required
-                        className="w-full px-4 py-2.5 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent text-xs bg-white text-gray-900 disabled:cursor-not-allowed disabled:bg-gray-50"
+                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent text-xs bg-white text-gray-900 disabled:cursor-not-allowed disabled:bg-gray-50"
                         value={formData.email}
                         onChange={handleChange}
                         disabled={isLoading}
@@ -125,7 +125,7 @@ export const SignupForm = ({ onToggleLogin }: { onToggleLogin: () => void }) => 
                         name="password"
                         placeholder="Enter Password"
                         required
-                        className="w-full px-4 py-2.5 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent text-xs bg-white text-gray-900 disabled:cursor-not-allowed disabled:bg-gray-50"
+                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent text-xs bg-white text-gray-900 disabled:cursor-not-allowed disabled:bg-gray-50"
                         value={formData.password}
                         onChange={handleChange}
                         disabled={isLoading}
@@ -139,7 +139,7 @@ export const SignupForm = ({ onToggleLogin }: { onToggleLogin: () => void }) => 
                         name="password_confirmation"
                         placeholder="Confirm your Password"
                         required
-                        className="w-full px-4 py-2.5 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent text-xs bg-white text-gray-900 disabled:cursor-not-allowed disabled:bg-gray-50"
+                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent text-xs bg-white text-gray-900 disabled:cursor-not-allowed disabled:bg-gray-50"
                         value={formData.password_confirmation}
                         onChange={handleChange}
                         disabled={isLoading}
@@ -148,7 +148,7 @@ export const SignupForm = ({ onToggleLogin }: { onToggleLogin: () => void }) => 
 
                 {/* Error Message */}
                 {error && (
-                    <div className="text-red-500 text-[10px] text-center bg-red-50 py-2 rounded border border-red-100">
+                    <div className="text-red-500 text-[10px] text-center bg-red-50 py-2 rounded-xl border border-red-100">
                         {error}
                     </div>
                 )}

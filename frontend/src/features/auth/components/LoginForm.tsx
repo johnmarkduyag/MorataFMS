@@ -63,7 +63,7 @@ export const LoginForm = ({ onToggleSignup }: { onToggleSignup: () => void }) =>
             type="email"
             placeholder="Enter your email"
             required
-            className="w-full px-4 py-2.5 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent text-xs bg-white text-gray-900 disabled:cursor-not-allowed disabled:bg-gray-50"
+            className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent text-xs bg-white text-gray-900 disabled:cursor-not-allowed disabled:bg-gray-50"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={isLoading}
@@ -76,7 +76,7 @@ export const LoginForm = ({ onToggleSignup }: { onToggleSignup: () => void }) =>
             type={showPassword ? "text" : "password"}
             placeholder="Enter your Password"
             required
-            className="w-full px-4 py-2.5 pr-10 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent text-xs bg-white text-gray-900 disabled:cursor-not-allowed disabled:bg-gray-50"
+            className="w-full px-4 py-2.5 pr-10 border border-gray-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent text-xs bg-white text-gray-900 disabled:cursor-not-allowed disabled:bg-gray-50"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             disabled={isLoading}
@@ -101,7 +101,7 @@ export const LoginForm = ({ onToggleSignup }: { onToggleSignup: () => void }) =>
 
         {/* Error Message */}
         {error && (
-          <div className="text-red-500 text-[10px] text-center bg-red-50 py-2 rounded border border-red-100">
+          <div className="text-red-500 text-[10px] text-center bg-red-50 dark:bg-red-900/20 py-2 rounded-xl border border-red-100 dark:border-red-900/30">
             {error}
           </div>
         )}

@@ -28,7 +28,6 @@ export const ExportList = () => {
         onConfirm: () => { },
     });
 
-
     const handleReset = () => {
         setFilterType('');
         setFilterValue('');
@@ -51,10 +50,10 @@ export const ExportList = () => {
     }, {} as Record<string, number>);
 
     const chartData = [
-        { label: 'Shipped', value: statusCounts['Shipped'] || 0, color: '#10b981' },
-        { label: 'Processing', value: statusCounts['Processing'] || 0, color: '#eab308' },
-        { label: 'Delayed', value: statusCounts['Delayed'] || 0, color: '#ef4444' },
-        { label: 'In Transit', value: statusCounts['In Transit'] || 0, color: '#3b82f6' },
+        { label: 'Shipped', value: statusCounts['Shipped'] || 0, color: '#4cd964' },
+        { label: 'Processing', value: statusCounts['Processing'] || 0, color: '#ffcc00' },
+        { label: 'Delayed', value: statusCounts['Delayed'] || 0, color: '#ff2d55' },
+        { label: 'In Transit', value: statusCounts['In Transit'] || 0, color: '#00d2ff' },
     ];
 
     return (
@@ -63,7 +62,7 @@ export const ExportList = () => {
             <div className="flex justify-between items-center">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900">Export Transactions</h1>
-                    <p className="text-sm text-gray-500">Dashboard / Export Transactions</p>
+                    <p className="text-sm text-gray-900 font-bold">Dashboard / Export Transactions</p>
                 </div>
 
                 {/* Search Bar Removed from here */}
@@ -75,10 +74,10 @@ export const ExportList = () => {
                         </svg>
                     </button>
                     <div className="text-right">
-                        <p className="text-sm font-semibold text-gray-900">{user?.name || 'FirstN LastN'}</p>
-                        <p className="text-xs text-gray-500">Document In Charge</p>
+                        <p className="text-sm font-semibold text-gray-900 dark:text-white">{user?.name || 'FirstN LastN'}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Document In Charge</p>
                     </div>
-                    <div className="w-10 h-10 rounded-full bg-[#2c3e50] flex items-center justify-center text-white font-semibold border-2 border-white shadow-md">
+                    <div className="w-10 h-10 rounded-full bg-[#1a2332] dark:bg-blue-600 flex items-center justify-center text-white font-semibold border-2 border-white dark:border-gray-800 shadow-md">
                         {user?.name ? user.name.split(' ').map((n: string) => n[0]).join('') : 'FL'}
                     </div>
                 </div>
@@ -89,10 +88,10 @@ export const ExportList = () => {
                 {/* Time & Date Cards - Stacked vertically */}
                 <div className="flex flex-col gap-6">
                     {/* Time Card */}
-                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100 flex-1 shadow-md">
+                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-sky-50 dark:to-blue-100 rounded-[2rem] p-6 border border-blue-100 dark:border-blue-200 flex-1 shadow-sm transition-colors">
                         <div className="flex items-center gap-3 mb-4">
-                            <div className="p-2 bg-blue-100 rounded-lg">
-                                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div className="p-2 bg-blue-100 dark:bg-white/50 rounded-xl">
+                                <svg className="w-5 h-5 text-blue-600 dark:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                             </div>
@@ -103,10 +102,10 @@ export const ExportList = () => {
                     </div>
 
                     {/* Date Card */}
-                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100 flex-1 shadow-md">
+                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-sky-50 dark:to-blue-100 rounded-[2rem] p-6 border border-blue-100 dark:border-blue-200 flex-1 shadow-sm transition-colors">
                         <div className="flex items-center gap-3 mb-4">
-                            <div className="p-2 bg-blue-100 rounded-lg">
-                                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div className="p-2 bg-blue-100 dark:bg-white/50 rounded-xl">
+                                <svg className="w-5 h-5 text-blue-600 dark:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
                             </div>
@@ -124,40 +123,40 @@ export const ExportList = () => {
             </div>
 
             {/* Transaction List - Full Width */}
-            <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-md">
+            <div className="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-sm transition-colors">
                 <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900">Export List</h3>
+                    <h3 className="text-lg font-bold text-gray-900">Export List</h3>
                     <div className="flex items-center gap-3">
                         <div className="relative">
                             <input
                                 type="text"
                                 placeholder="Search anything"
-                                className="pl-10 pr-4 py-2 bg-white rounded-lg border border-gray-200 text-sm w-64 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                                className="pl-10 pr-4 py-2 bg-white rounded-2xl border border-gray-200 text-sm w-64 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-gray-900 font-medium"
                             />
-                            <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
                         </div>
                         <div className="relative">
-                            <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 z-10 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-700 z-10 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                             </svg>
                             <button
                                 onClick={() => setOpenDropdown(openDropdown === 'filter' ? null : 'filter')}
-                                className="pl-9 pr-8 py-2 text-sm rounded-lg border border-blue-200 bg-blue-50 text-gray-900 min-w-[100px] text-left relative flex items-center justify-between focus:outline-none"
+                                className="pl-9 pr-8 py-2 text-sm rounded-2xl border border-gray-200 bg-white text-gray-900 font-bold min-w-[100px] text-left relative flex items-center justify-between focus:outline-none transition-all hover:border-gray-300"
                             >
                                 {filterType || 'Filter'}
-                                <svg className="w-4 h-4 ml-2 text-gray-500 absolute right-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-4 h-4 ml-2 text-gray-600 absolute right-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                                 </svg>
                             </button>
 
                             {openDropdown === 'filter' && (
-                                <div className="absolute top-full left-0 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-[100] py-1">
+                                <div className="absolute top-full left-0 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg z-[100] py-1">
                                     {['SC', 'Status'].map((opt) => (
                                         <div
                                             key={opt}
-                                            className="px-4 py-2 hover:bg-gray-50 cursor-pointer text-sm text-gray-700"
+                                            className="px-4 py-2 hover:bg-gray-50 cursor-pointer text-sm text-gray-900 font-medium"
                                             onClick={() => {
                                                 setFilterType(opt);
                                                 setOpenDropdown(null);
@@ -170,15 +169,13 @@ export const ExportList = () => {
                             )}
                         </div>
 
-                        <span className="text-sm text-gray-500 font-medium">Sort by:</span>
-
                         <div className="relative">
                             <button
                                 onClick={() => setOpenDropdown(openDropdown === 'colour' ? null : 'colour')}
-                                className="pr-8 py-2 pl-3 text-sm rounded-lg border border-blue-200 bg-blue-50 text-gray-900 min-w-[140px] text-left relative flex items-center justify-between focus:outline-none"
+                                className="pr-8 py-2 pl-3 text-sm rounded-2xl border border-gray-200 bg-white text-gray-900 font-bold min-w-[140px] text-left relative flex items-center justify-between focus:outline-none transition-all hover:border-gray-300"
                             >
                                 {filterValue || 'Colour'}
-                                <svg className="w-4 h-4 ml-2 text-gray-500 absolute right-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-4 h-4 ml-2 text-gray-600 absolute right-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                                 </svg>
                             </button>
@@ -188,7 +185,7 @@ export const ExportList = () => {
                                     {filterType === 'SC' && ['Green', 'Yellow', 'Orange', 'Red'].map((color) => (
                                         <div
                                             key={color}
-                                            className="px-4 py-2 hover:bg-gray-50 cursor-pointer text-sm text-gray-700"
+                                            className="px-4 py-2 hover:bg-gray-50 cursor-pointer text-sm text-gray-900 font-medium"
                                             onClick={() => {
                                                 setFilterValue(color);
                                                 setOpenDropdown(null);
@@ -200,7 +197,7 @@ export const ExportList = () => {
                                     {filterType === 'Status' && ['Green', 'Yellow', 'Orange', 'Red', 'Blue'].map((color) => (
                                         <div
                                             key={color}
-                                            className="px-4 py-2 hover:bg-gray-50 cursor-pointer text-sm text-gray-700"
+                                            className="px-4 py-2 hover:bg-gray-50 cursor-pointer text-sm text-gray-900 font-medium"
                                             onClick={() => {
                                                 setFilterValue(color);
                                                 setOpenDropdown(null);
@@ -226,12 +223,13 @@ export const ExportList = () => {
                 </div>
 
                 {/* Table Header */}
-                <div className="grid gap-4 pb-3 border-b border-gray-200 mb-3 px-2"
-                    style={{ gridTemplateColumns: '2fr 1.5fr 1.5fr 80px' }}>
-                    <span className="text-xs font-semibold text-gray-500 uppercase">Shipper</span>
-                    <span className="text-xs font-semibold text-gray-500 uppercase">Bill of Lading</span>
-                    <span className="text-xs font-semibold text-gray-500 uppercase">Vessel</span>
-                    <span className="text-xs font-semibold text-gray-500 uppercase text-right">Actions</span>
+                <div className="grid gap-4 pb-3 border-b border-gray-100 mb-3 px-2 font-bold"
+                    style={{ gridTemplateColumns: '1fr 2fr 1.5fr 1.5fr 80px' }}>
+                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Ref ID</span>
+                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Shipper</span>
+                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Bill of Lading</span>
+                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Vessel</span>
+                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Actions</span>
                 </div>
 
                 {/* Table Rows */}
@@ -240,12 +238,13 @@ export const ExportList = () => {
                         <div
                             key={i}
                             onClick={() => navigate('/tracking/REF-EXPORT-001')}
-                            className="grid gap-4 py-2 items-center cursor-pointer rounded-lg transition-colors px-2 hover:bg-gray-50"
-                            style={{ gridTemplateColumns: '2fr 1.5fr 1.5fr 80px' }}
+                            className="grid gap-4 py-2 items-center cursor-pointer rounded-xl transition-all duration-200 px-2 hover:bg-gray-50 hover:shadow-sm"
+                            style={{ gridTemplateColumns: '1fr 2fr 1.5fr 1.5fr 80px' }}
                         >
-                            <p className="text-sm text-gray-900 font-medium">{row.shipper}</p>
-                            <p className="text-sm text-gray-600">{row.bl}</p>
-                            <p className="text-sm text-gray-600">{row.vessel}</p>
+                            <p className="text-sm font-bold text-gray-900">{row.ref}</p>
+                            <p className="text-sm text-slate-500 font-bold">{row.shipper}</p>
+                            <p className="text-sm text-slate-500 font-bold">{row.bl}</p>
+                            <p className="text-sm text-slate-500 font-bold">{row.vessel}</p>
                             <div className="flex justify-end gap-2 px-1">
                                 <button
                                     className="p-1.5 text-blue-600 hover:bg-blue-50 rounded"
@@ -264,7 +263,6 @@ export const ExportList = () => {
                                     }}
                                 >
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                     </svg>
                                 </button>
@@ -275,16 +273,17 @@ export const ExportList = () => {
                                             isOpen: true,
                                             title: 'Delete Export',
                                             message: 'Are you sure you want to delete this export transaction? This action cannot be undone.',
+                                            confirmText: 'Delete',
+                                            confirmButtonClass: 'bg-red-600 hover:bg-red-700',
                                             onConfirm: () => {
-                                                /* Logic to delete */
                                                 console.log('Deleted', row.ref);
                                             }
                                         });
                                     }}
-                                    className="p-1.5 text-red-600 hover:bg-red-50 rounded"
+                                    className="p-1.5 text-gray-600 hover:bg-red-50 hover:text-red-500 rounded-lg transition-colors"
+                                    title="Delete"
                                 >
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                     </svg>
                                 </button>
@@ -296,28 +295,28 @@ export const ExportList = () => {
                 {/* Table Pagination */}
                 <div className="mt-6 flex items-center justify-between border-t border-gray-100 pt-6 px-2">
                     <div className="flex items-center gap-2">
-                        <span className="text-sm text-gray-500">Show</span>
-                        <select className="bg-gray-50 border border-gray-200 text-gray-900 text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 p-1 px-2 outline-none cursor-pointer">
+                        <span className="text-sm text-gray-900 font-bold">Show</span>
+                        <select className="bg-gray-50 border border-gray-200 text-gray-900 text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 p-1 px-2 outline-none cursor-pointer font-bold">
                             <option value="5">5</option>
                             <option value="10">10</option>
                             <option value="25">25</option>
                         </select>
-                        <span className="text-sm text-gray-500">of 100 pages</span>
+                        <span className="text-sm text-gray-900 font-bold">of 100 pages</span>
                     </div>
                     <div className="flex items-center gap-2">
-                        <button className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50 transition-colors">
+                        <button className="p-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
                             </svg>
                         </button>
                         <div className="flex items-center gap-1">
-                            <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#1a2332] text-white text-sm font-medium">1</button>
-                            <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-600 text-sm font-medium transition-colors">2</button>
-                            <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-600 text-sm font-medium transition-colors">3</button>
-                            <span className="text-gray-400 px-1">...</span>
-                            <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-600 text-sm font-medium transition-colors">16</button>
+                            <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#1a2332] text-white text-sm font-bold">1</button>
+                            <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-900 text-sm font-bold transition-colors">2</button>
+                            <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-900 text-sm font-bold transition-colors">3</button>
+                            <span className="text-gray-900 px-1 font-bold">...</span>
+                            <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-900 text-sm font-bold transition-colors">16</button>
                         </div>
-                        <button className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50 transition-colors">
+                        <button className="p-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
                             </svg>
@@ -335,8 +334,6 @@ export const ExportList = () => {
                 confirmText={confirmModal.confirmText}
                 confirmButtonClass={confirmModal.confirmButtonClass}
             />
-
         </div>
-
     );
 };

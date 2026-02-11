@@ -24,10 +24,10 @@ export const AuthPage = () => {
     };
 
     return (
-        <div className="bg-[#e8e8e8] min-h-screen flex flex-col overflow-hidden">
+        <div className="bg-[#1a2332] min-h-screen flex flex-col overflow-hidden transition-colors">
             {/* Main Content */}
             <main className="flex-1 flex items-center justify-center px-4 py-12 md:px-16">
-                <div className="bg-white rounded-sm shadow-md w-full max-w-[850px] min-h-[500px] flex relative overflow-hidden">
+                <div className="bg-white rounded-[3rem] shadow-2xl w-full max-w-[850px] min-h-[500px] flex relative overflow-hidden transition-all">
 
                     {/* Blue Panel (Absolute) */}
                     <div
@@ -55,8 +55,8 @@ export const AuthPage = () => {
                             </div>
 
                             <div className="text-center mb-6">
-                                <h1 className="text-2xl font-bold text-gray-900 mb-1">Welcome!</h1>
-                                <p className="text-gray-500 text-[10px] sm:text-xs">Your work, your team, your flow — all in one place.</p>
+                                <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">Welcome!</h1>
+                                <p className="text-gray-500 dark:text-gray-400 text-[10px] sm:text-xs">Your work, your team, your flow — all in one place.</p>
                             </div>
 
                             <LoginForm onToggleSignup={() => toggleMode(false)} />
@@ -89,7 +89,7 @@ export const AuthPage = () => {
                             </div>
 
                             <div className="text-center mb-6">
-                                <h1 className="text-2xl font-bold text-gray-900">Create an account</h1>
+                                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Create an account</h1>
                             </div>
 
                             <SignupForm onToggleLogin={() => toggleMode(true)} />
@@ -108,7 +108,7 @@ export const AuthPage = () => {
             </main>
 
             {/* Footer */}
-            <footer className="bg-black text-white px-8 py-5 flex justify-between shrink-0">
+            <footer className="bg-black dark:bg-[#111] text-white px-8 py-5 flex justify-between shrink-0 transition-colors">
                 <span className="text-[10px] font-semibold tracking-widest uppercase">Footer</span>
                 <span className="text-[10px] font-semibold tracking-widest uppercase">Footer</span>
             </footer>

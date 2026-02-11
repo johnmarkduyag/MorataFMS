@@ -2,7 +2,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 export const TrackingDetails = () => {
     const navigate = useNavigate();
-    const { referenceId } = useParams();
+    const { id } = useParams();
 
     const sections = [
         {
@@ -50,15 +50,22 @@ export const TrackingDetails = () => {
                 <div className="flex items-center gap-4">
                     <button
                         onClick={() => navigate(-1)}
-                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-600"
+                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-900"
                     >
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                         </svg>
                     </button>
-                    <h1 className="text-2xl font-bold text-gray-900">Tracking Details</h1>
+                    <div>
+                        <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
+                            Ref No: {id}
+                        </h1>
+                        <div className="flex items-center gap-2 mt-1">
+                            <span className="text-sm font-bold text-gray-700">Tracking Dashboard /</span>
+                            <span className="text-sm text-gray-900 font-bold">{id}</span>
+                        </div>
+                    </div>
                 </div>
-
                 {/* User Profile (If needed by layout logic, otherwise MainLayout handles it) */}
                 {/* For now, keeping it simple as MainLayout handles header in non-details mode, 
                     but TrackingDetails.html had its own header structure.
@@ -66,11 +73,11 @@ export const TrackingDetails = () => {
             </div>
 
             {/* Status Overview Card */}
-            <div className="bg-white rounded-2xl p-6 border border-gray-200 mb-8 shadow-sm">
+            <div className="bg-white rounded-[2rem] p-6 border border-gray-100 mb-8 shadow-sm">
                 <div className="flex justify-between items-start">
                     <div>
-                        <h2 className="text-lg font-bold text-gray-900 mb-1">{referenceId || 'REF-2024-001'}</h2>
-                        <p className="text-sm text-gray-500">Bill of Lading: <span className="text-gray-900 font-medium">BL-78542136</span></p>
+                        <h2 className="text-lg font-bold text-gray-900 mb-1">{id || 'REF-2024-001'}</h2>
+                        <p className="text-sm text-gray-700 font-bold">Bill of Lading: <span className="text-gray-900 font-bold">BL-78542136</span></p>
                     </div>
                     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-50 text-green-700 text-sm font-medium">
                         <span className="w-2 h-2 rounded-full bg-green-500"></span>
@@ -84,17 +91,17 @@ export const TrackingDetails = () => {
                 {sections.map((section, i) => (
                     <div
                         key={i}
-                        className="bg-white rounded-xl p-6 border border-gray-200 shadow-md hover:border-blue-500 transition-colors group cursor-pointer"
+                        className="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-md hover:border-blue-500 transition-colors group cursor-pointer"
                     >
                         <div className="flex items-center gap-3 mb-4">
-                            <div className="p-2 bg-blue-50 text-blue-600 rounded-lg group-hover:bg-blue-100 transition-colors">
+                            <div className="p-2 bg-blue-50 text-blue-800 rounded-xl group-hover:bg-blue-100 transition-colors">
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={section.icon} />
                                 </svg>
                             </div>
                             <h3 className="font-bold text-gray-900">{section.title}</h3>
                         </div>
-                        <p className={`text-sm font-medium ${section.statusColor}`}>{section.status}</p>
+                        <p className={`text-sm font-bold ${section.status === 'Completed' ? 'text-green-600' : section.status === 'In Progress' ? 'text-blue-600' : 'text-gray-700'}`}>{section.status}</p>
                     </div>
                 ))}
             </div>

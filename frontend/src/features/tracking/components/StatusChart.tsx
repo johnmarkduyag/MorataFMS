@@ -4,74 +4,75 @@ interface StatusChartProps {
 
 export const StatusChart = ({ data }: StatusChartProps) => {
     const total = data.reduce((sum, item) => sum + item.value, 0);
-    let currentAngle = -90; // Start from top
+    const sortedData = [...data].sort((a, b) => b.value - a.value);
 
-    const segments = data.map((item) => {
-        const percentage = (item.value / total) * 100;
-        const angle = (percentage / 100) * 360;
-        const startAngle = currentAngle;
-        const endAngle = currentAngle + angle;
-        currentAngle = endAngle;
-
-        // Convert angles to radians
-        const startRad = (startAngle * Math.PI) / 180;
-        const endRad = (endAngle * Math.PI) / 180;
-
-        // Calculate arc path
-        const radius = 80;
-        const innerRadius = 50;
-        const cx = 100;
-        const cy = 100;
-
-        const x1 = cx + radius * Math.cos(startRad);
-        const y1 = cy + radius * Math.sin(startRad);
-        const x2 = cx + radius * Math.cos(endRad);
-        const y2 = cy + radius * Math.sin(endRad);
-        const x3 = cx + innerRadius * Math.cos(endRad);
-        const y3 = cy + innerRadius * Math.sin(endRad);
-        const x4 = cx + innerRadius * Math.cos(startRad);
-        const y4 = cy + innerRadius * Math.sin(startRad);
-
-        const largeArc = angle > 180 ? 1 : 0;
-
-        const pathData = [
-            `M ${x1} ${y1}`,
-            `A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2}`,
-            `L ${x3} ${y3}`,
-            `A ${innerRadius} ${innerRadius} 0 ${largeArc} 0 ${x4} ${y4}`,
-            'Z'
-        ].join(' ');
-
-        return {
-            path: pathData,
-            color: item.color,
-            label: item.label,
-            value: item.value,
-            percentage: percentage.toFixed(0)
-        };
-    });
+    // Calculate chart dimensions
+    const size = 200;
+    const center = size / 2;
+    const baseRadius = 85;
+    const strokeWidth = 14;
+    const spacing = 4;
 
     return (
-        <div className="bg-white rounded-2xl p-6 shadow-md border border-gray-200 h-full flex flex-col">
-            <h3 className="text-sm font-semibold text-gray-900 mb-6">Status Overview</h3>
-            <div className="flex items-center justify-center gap-8 flex-1">
-                {/* Chart */}
-                <div className="relative flex-shrink-0">
-                    <svg width="240" height="240" viewBox="0 0 200 200" className="w-full h-auto">
-                        {segments.map((segment, i) => (
-                            <path key={i} d={segment.path} fill={segment.color} />
-                        ))}
+        <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100 h-full flex flex-col">
+            <h3 className="text-sm font-bold text-gray-900 mb-6">Status Overview</h3>
+            <div className="flex flex-col lg:flex-row items-center justify-center gap-8 flex-1">
+                {/* Activity Rings Chart */}
+                <div className="relative w-48 h-48 flex-shrink-0">
+                    <svg
+                        width={size}
+                        height={size}
+                        viewBox={`0 0 ${size} ${size}`}
+                        className="transform -rotate-90 w-full h-full"
+                    >
+                        {sortedData.map((item, i) => {
+                            const radius = baseRadius - (i * (strokeWidth + spacing));
+                            const circumference = 2 * Math.PI * radius;
+                            const percentage = (item.value / total) * 100;
+                            const offset = circumference - (percentage / 100) * circumference;
+
+                            return (
+                                <g key={i}>
+                                    {/* Track (Background) */}
+                                    <circle
+                                        cx={center}
+                                        cy={center}
+                                        r={radius}
+                                        fill="transparent"
+                                        stroke={item.color}
+                                        strokeWidth={strokeWidth}
+                                        className="opacity-10"
+                                    />
+                                    {/* Progress Ring */}
+                                    <circle
+                                        cx={center}
+                                        cy={center}
+                                        r={radius}
+                                        fill="transparent"
+                                        stroke={item.color}
+                                        strokeWidth={strokeWidth}
+                                        strokeDasharray={circumference}
+                                        strokeDashoffset={offset}
+                                        strokeLinecap="round"
+                                        className="transition-all duration-1000 ease-out"
+                                    />
+                                </g>
+                            );
+                        })}
                     </svg>
                 </div>
 
-                {/* Legend */}
-                <div className="flex-1 grid grid-cols-2 gap-4">
-                    {segments.map((segment, i) => (
-                        <div key={i} className="flex items-start gap-3">
-                            <div className={`w-3 h-3 rounded-full mt-1 flex-shrink-0`} style={{ backgroundColor: segment.color }}></div>
-                            <div>
-                                <p className="text-gray-900 font-medium text-sm">{segment.label}</p>
-                                <p className="text-gray-500 text-xs">{segment.value} · {segment.percentage}%</p>
+                {/* Pill Legend */}
+                <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-6 w-full lg:w-auto">
+                    {sortedData.map((item, i) => (
+                        <div key={i} className="flex items-center gap-3">
+                            <div
+                                className="w-8 h-2.5 rounded-full flex-shrink-0 shadow-sm"
+                                style={{ backgroundColor: item.color }}
+                            ></div>
+                            <div className="min-w-0">
+                                <p className="text-gray-900 font-bold text-xs truncate uppercase tracking-tight">{item.label}</p>
+                                <p className="text-slate-400 font-semibold text-[10px]">{item.value} Units</p>
                             </div>
                         </div>
                     ))}
