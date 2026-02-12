@@ -1,5 +1,5 @@
-import { createContext, useEffect, useState, useContext } from 'react';
 import type { ReactNode } from 'react';
+import { createContext, useEffect, useState } from 'react';
 import { authApi } from '../api/authApi';
 import type { AuthState, LoginCredentials, RegisterCredentials, User } from '../types/auth.types';
 
@@ -12,15 +12,7 @@ interface AuthContextType extends AuthState {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Export hook for usage
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
-};
-
+// Export the context so it can be used in custom hooks
 export { AuthContext };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
