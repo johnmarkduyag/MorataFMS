@@ -11,9 +11,6 @@ interface LayoutContext {
 
 export const ExportList = () => {
     const navigate = useNavigate();
-    const [filterType, setFilterType] = useState<string>('');
-    const [filterValue, setFilterValue] = useState<string>('');
-    const [openDropdown, setOpenDropdown] = useState<'filter' | 'colour' | null>(null);
     const [confirmModal, setConfirmModal] = useState<{
         isOpen: boolean;
         title: string;
@@ -28,11 +25,6 @@ export const ExportList = () => {
         onConfirm: () => { },
     });
 
-    const handleReset = () => {
-        setFilterType('');
-        setFilterValue('');
-        setOpenDropdown(null);
-    };
     const { user, dateTime } = useOutletContext<LayoutContext>();
 
     const data = [
@@ -65,8 +57,6 @@ export const ExportList = () => {
                     <p className="text-sm text-gray-900 font-bold">Dashboard / Export Transactions</p>
                 </div>
 
-                {/* Search Bar Removed from here */}
-
                 <div className="flex items-center gap-4">
                     <button className="p-2 bg-white rounded-lg border border-gray-200 hover:bg-gray-50">
                         <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -74,10 +64,10 @@ export const ExportList = () => {
                         </svg>
                     </button>
                     <div className="text-right">
-                        <p className="text-sm font-semibold text-gray-900 dark:text-white">{user?.name || 'FirstN LastN'}</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">Document In Charge</p>
+                        <p className="text-sm font-semibold text-gray-900">{user?.name || 'FirstN LastN'}</p>
+                        <p className="text-xs text-gray-500">Document In Charge</p>
                     </div>
-                    <div className="w-10 h-10 rounded-full bg-[#1a2332] dark:bg-blue-600 flex items-center justify-center text-white font-semibold border-2 border-white dark:border-gray-800 shadow-md">
+                    <div className="w-10 h-10 rounded-full bg-[#1a2332] flex items-center justify-center text-white font-semibold border-2 border-white shadow-md">
                         {user?.name ? user.name.split(' ').map((n: string) => n[0]).join('') : 'FL'}
                     </div>
                 </div>
@@ -122,205 +112,131 @@ export const ExportList = () => {
                 </div>
             </div>
 
-            {/* Transaction List - Full Width */}
-            <div className="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-sm transition-colors">
-                <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-lg font-bold text-gray-900">Export List</h3>
-                    <div className="flex items-center gap-3">
-                        <div className="relative">
-                            <input
-                                type="text"
-                                placeholder="Search anything"
-                                className="pl-10 pr-4 py-2 bg-white rounded-2xl border border-gray-200 text-sm w-64 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-gray-900 font-medium"
-                            />
-                            <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                        </div>
-                        <div className="relative">
-                            <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-700 z-10 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                            </svg>
-                            <button
-                                onClick={() => setOpenDropdown(openDropdown === 'filter' ? null : 'filter')}
-                                className="pl-9 pr-8 py-2 text-sm rounded-2xl border border-gray-200 bg-white text-gray-900 font-bold min-w-[100px] text-left relative flex items-center justify-between focus:outline-none transition-all hover:border-gray-300"
-                            >
-                                {filterType || 'Filter'}
-                                <svg className="w-4 h-4 ml-2 text-gray-600 absolute right-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </button>
-
-                            {openDropdown === 'filter' && (
-                                <div className="absolute top-full left-0 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg z-[100] py-1">
-                                    {['SC', 'Status'].map((opt) => (
-                                        <div
-                                            key={opt}
-                                            className="px-4 py-2 hover:bg-gray-50 cursor-pointer text-sm text-gray-900 font-medium"
-                                            onClick={() => {
-                                                setFilterType(opt);
-                                                setOpenDropdown(null);
-                                            }}
-                                        >
-                                            {opt}
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="relative">
-                            <button
-                                onClick={() => setOpenDropdown(openDropdown === 'colour' ? null : 'colour')}
-                                className="pr-8 py-2 pl-3 text-sm rounded-2xl border border-gray-200 bg-white text-gray-900 font-bold min-w-[140px] text-left relative flex items-center justify-between focus:outline-none transition-all hover:border-gray-300"
-                            >
-                                {filterValue || 'Colour'}
-                                <svg className="w-4 h-4 ml-2 text-gray-600 absolute right-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </button>
-
-                            {openDropdown === 'colour' && (
-                                <div className="absolute top-full left-0 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-[100] py-1">
-                                    {filterType === 'SC' && ['Green', 'Yellow', 'Orange', 'Red'].map((color) => (
-                                        <div
-                                            key={color}
-                                            className="px-4 py-2 hover:bg-gray-50 cursor-pointer text-sm text-gray-900 font-medium"
-                                            onClick={() => {
-                                                setFilterValue(color);
-                                                setOpenDropdown(null);
-                                            }}
-                                        >
-                                            {color}
-                                        </div>
-                                    ))}
-                                    {filterType === 'Status' && ['Green', 'Yellow', 'Orange', 'Red', 'Blue'].map((color) => (
-                                        <div
-                                            key={color}
-                                            className="px-4 py-2 hover:bg-gray-50 cursor-pointer text-sm text-gray-900 font-medium"
-                                            onClick={() => {
-                                                setFilterValue(color);
-                                                setOpenDropdown(null);
-                                            }}
-                                        >
-                                            {color}
-                                        </div>
-                                    ))}
-                                    {!filterType && (
-                                        <div className="px-4 py-2 text-sm text-gray-400 italic">Select Filter first</div>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-
-                        <button
-                            onClick={handleReset}
-                            className="bg-gray-900 hover:bg-gray-800 text-white text-xs font-bold py-2 px-4 rounded-lg uppercase tracking-wider transition-colors shadow-sm ml-auto"
-                        >
-                            DEFAULT
-                        </button>
+            {/* Controls Bar Above the List Card */}
+            <div className="flex justify-end items-center mb-6 px-2">
+                <div className="flex items-center gap-3">
+                    <div className="relative">
+                        <input
+                            type="text"
+                            placeholder="Search anything"
+                            className="pl-10 pr-4 py-2 bg-white rounded-2xl border border-gray-200 text-sm w-64 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-gray-900 font-medium"
+                        />
+                        <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
                     </div>
-                </div>
 
-                {/* Table Header */}
-                <div className="grid gap-4 pb-3 border-b border-gray-100 mb-3 px-2 font-bold"
-                    style={{ gridTemplateColumns: '1fr 2fr 1.5fr 1.5fr 80px' }}>
-                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Ref ID</span>
-                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Shipper</span>
-                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Bill of Lading</span>
-                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Vessel</span>
-                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Actions</span>
+                    <button
+                        className="bg-gray-900 hover:bg-gray-800 text-white text-xs font-bold py-2.5 px-6 rounded-xl uppercase tracking-wider transition-colors shadow-sm ml-auto"
+                    >
+                        DEFAULT
+                    </button>
                 </div>
+            </div>
 
-                {/* Table Rows */}
-                <div className="space-y-1">
-                    {data.map((row, i) => (
-                        <div
-                            key={i}
-                            onClick={() => navigate('/tracking/REF-EXPORT-001')}
-                            className="grid gap-4 py-2 items-center cursor-pointer rounded-xl transition-all duration-200 px-2 hover:bg-gray-50 hover:shadow-sm"
-                            style={{ gridTemplateColumns: '1fr 2fr 1.5fr 1.5fr 80px' }}
-                        >
-                            <p className="text-sm font-bold text-gray-900">{row.ref}</p>
-                            <p className="text-sm text-slate-500 font-bold">{row.shipper}</p>
-                            <p className="text-sm text-slate-500 font-bold">{row.bl}</p>
-                            <p className="text-sm text-slate-500 font-bold">{row.vessel}</p>
-                            <div className="flex justify-end gap-2 px-1">
-                                <button
-                                    className="p-1.5 text-blue-600 hover:bg-blue-50 rounded"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        setConfirmModal({
-                                            isOpen: true,
-                                            title: 'Edit Export',
-                                            message: 'Are you sure you want to edit this export transaction?',
-                                            confirmText: 'Confirm Edit',
-                                            confirmButtonClass: 'bg-blue-600 hover:bg-blue-700',
-                                            onConfirm: () => {
-                                                navigate(`/tracking/${row.ref}`);
-                                            }
-                                        });
-                                    }}
-                                >
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                    </svg>
-                                </button>
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        setConfirmModal({
-                                            isOpen: true,
-                                            title: 'Delete Export',
-                                            message: 'Are you sure you want to delete this export transaction? This action cannot be undone.',
-                                            confirmText: 'Delete',
-                                            confirmButtonClass: 'bg-red-600 hover:bg-red-700',
-                                            onConfirm: () => {
-                                                console.log('Deleted', row.ref);
-                                            }
-                                        });
-                                    }}
-                                    className="p-1.5 text-gray-600 hover:bg-red-50 hover:text-red-500 rounded-lg transition-colors"
-                                    title="Delete"
-                                >
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                </button>
+            {/* Transaction List Card */}
+            <div className="bg-white rounded-[2rem] border border-gray-100 shadow-sm transition-colors overflow-hidden">
+                <div className="p-6">
+                    {/* Table Header */}
+                    <div className="grid gap-4 pb-3 border-b border-gray-100 mb-3 px-2 font-bold"
+                        style={{ gridTemplateColumns: '1fr 2fr 1.5fr 1.5fr 80px' }}>
+                        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Ref ID</span>
+                        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Shipper</span>
+                        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Bill of Lading</span>
+                        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Vessel</span>
+                        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Actions</span>
+                    </div>
+
+                    {/* Table Rows */}
+                    <div className="space-y-1">
+                        {data.map((row, i) => (
+                            <div
+                                key={i}
+                                onClick={() => navigate('/tracking/REF-EXPORT-001')}
+                                className="grid gap-4 py-2 items-center cursor-pointer rounded-xl transition-all duration-200 px-2 hover:bg-gray-50 hover:shadow-sm"
+                                style={{ gridTemplateColumns: '1fr 2fr 1.5fr 1.5fr 80px' }}
+                            >
+                                <p className="text-sm font-bold text-gray-900">{row.ref}</p>
+                                <p className="text-sm text-slate-500 font-bold">{row.shipper}</p>
+                                <p className="text-sm text-slate-500 font-bold">{row.bl}</p>
+                                <p className="text-sm text-slate-500 font-bold">{row.vessel}</p>
+                                <div className="flex justify-end gap-2 px-1">
+                                    <button
+                                        className="p-1.5 text-blue-600 hover:bg-blue-50 rounded"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setConfirmModal({
+                                                isOpen: true,
+                                                title: 'Edit Export',
+                                                message: 'Are you sure you want to edit this export transaction?',
+                                                confirmText: 'Confirm Edit',
+                                                confirmButtonClass: 'bg-blue-600 hover:bg-blue-700',
+                                                onConfirm: () => {
+                                                    navigate(`/tracking/${row.ref}`);
+                                                }
+                                            });
+                                        }}
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </button>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setConfirmModal({
+                                                isOpen: true,
+                                                title: 'Delete Export',
+                                                message: 'Are you sure you want to delete this export transaction? This action cannot be undone.',
+                                                confirmText: 'Delete',
+                                                confirmButtonClass: 'bg-red-600 hover:bg-red-700',
+                                                onConfirm: () => {
+                                                    console.log('Deleted', row.ref);
+                                                }
+                                            });
+                                        }}
+                                        className="p-1.5 text-gray-600 hover:bg-red-50 hover:text-red-500 rounded-lg transition-colors"
+                                        title="Delete"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    ))}
-                </div>
-
-                {/* Table Pagination */}
-                <div className="mt-6 flex items-center justify-between border-t border-gray-100 pt-6 px-2">
-                    <div className="flex items-center gap-2">
-                        <span className="text-sm text-gray-900 font-bold">Show</span>
-                        <select className="bg-gray-50 border border-gray-200 text-gray-900 text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 p-1 px-2 outline-none cursor-pointer font-bold">
-                            <option value="5">5</option>
-                            <option value="10">10</option>
-                            <option value="25">25</option>
-                        </select>
-                        <span className="text-sm text-gray-900 font-bold">of 100 pages</span>
+                        ))}
                     </div>
-                    <div className="flex items-center gap-2">
-                        <button className="p-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
-                            </svg>
-                        </button>
-                        <div className="flex items-center gap-1">
-                            <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#1a2332] text-white text-sm font-bold">1</button>
-                            <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-900 text-sm font-bold transition-colors">2</button>
-                            <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-900 text-sm font-bold transition-colors">3</button>
-                            <span className="text-gray-900 px-1 font-bold">...</span>
-                            <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-900 text-sm font-bold transition-colors">16</button>
+
+                    {/* Table Pagination */}
+                    <div className="mt-6 flex items-center justify-between border-t border-gray-100 pt-6 px-2">
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm text-gray-900 font-bold">Show</span>
+                            <select className="bg-gray-50 border border-gray-200 text-gray-900 text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 p-1 px-2 outline-none cursor-pointer font-bold">
+                                <option value="5">5</option>
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                            </select>
+                            <span className="text-sm text-gray-900 font-bold">of 100 pages</span>
                         </div>
-                        <button className="p-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                            </svg>
-                        </button>
+                        <div className="flex items-center gap-2">
+                            <button className="p-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+                                </svg>
+                            </button>
+                            <div className="flex items-center gap-1">
+                                <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#1a2332] text-white text-sm font-bold">1</button>
+                                <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-900 text-sm font-bold transition-colors">2</button>
+                                <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-900 text-sm font-bold transition-colors">3</button>
+                                <span className="text-gray-900 px-1 font-bold">...</span>
+                                <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-900 text-sm font-bold transition-colors">16</button>
+                            </div>
+                            <button className="p-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
