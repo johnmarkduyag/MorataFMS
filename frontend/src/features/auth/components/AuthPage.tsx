@@ -31,7 +31,7 @@ export const AuthPage = () => {
 
                     {/* Blue Panel (Absolute) */}
                     <div
-                        className={`hidden md:block absolute top-0 left-0 w-1/2 h-full bg-[#1a2332] z-10 transition-transform duration-600 ease-in-out ${isLogin ? "translate-x-full" : "translate-x-0"
+                        className={`hidden md:block absolute top-0 left-0 w-1/2 h-full bg-black z-10 transition-transform duration-600 ease-in-out ${isLogin ? "translate-x-full" : "translate-x-0"
                             }`}
                     ></div>
 
@@ -46,10 +46,10 @@ export const AuthPage = () => {
                             <div className="flex justify-center mb-8">
                                 <div className="w-12 h-12 relative">
                                     <svg viewBox="0 0 64 64" className="w-full h-full">
-                                        <circle cx="32" cy="32" r="30" fill="#1e3a5f" stroke="#c41e3a" strokeWidth="2" />
+                                        <circle cx="32" cy="32" r="30" fill="#000000" stroke="#c41e3a" strokeWidth="2" />
                                         <path d="M20 32 Q32 20 44 32 Q32 44 20 32" fill="#c41e3a" />
                                         <circle cx="32" cy="32" r="8" fill="white" />
-                                        <path d="M28 28 L36 36 M36 28 L28 36" stroke="#1e3a5f" strokeWidth="2" />
+                                        <path d="M28 28 L36 36 M36 28 L28 36" stroke="#000000" strokeWidth="2" />
                                     </svg>
                                 </div>
                             </div>
@@ -80,10 +80,10 @@ export const AuthPage = () => {
                             <div className="flex justify-center mb-4">
                                 <div className="w-12 h-12 relative">
                                     <svg viewBox="0 0 64 64" className="w-full h-full">
-                                        <circle cx="32" cy="32" r="30" fill="#1e3a5f" stroke="#c41e3a" strokeWidth="2" />
+                                        <circle cx="32" cy="32" r="30" fill="#000000" stroke="#c41e3a" strokeWidth="2" />
                                         <path d="M20 32 Q32 20 44 32 Q32 44 20 32" fill="#c41e3a" />
                                         <circle cx="32" cy="32" r="8" fill="white" />
-                                        <path d="M28 28 L36 36 M36 28 L28 36" stroke="#1e3a5f" strokeWidth="2" />
+                                        <path d="M28 28 L36 36 M36 28 L28 36" stroke="#000000" strokeWidth="2" />
                                     </svg>
                                 </div>
                             </div>

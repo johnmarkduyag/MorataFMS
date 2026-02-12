@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { ConfirmationModal } from '../../../components/ConfirmationModal';
-
+import { EncodeModal } from './EncodeModal';
 import { StatusChart } from './StatusChart';
 
 interface LayoutContext {
@@ -11,6 +11,7 @@ interface LayoutContext {
 
 export const ExportList = () => {
     const navigate = useNavigate();
+    const [isEncodeModalOpen, setIsEncodeModalOpen] = useState(false);
     const [confirmModal, setConfirmModal] = useState<{
         isOpen: boolean;
         title: string;
@@ -67,7 +68,7 @@ export const ExportList = () => {
                         <p className="text-sm font-semibold text-gray-900">{user?.name || 'FirstN LastN'}</p>
                         <p className="text-xs text-gray-500">Document In Charge</p>
                     </div>
-                    <div className="w-10 h-10 rounded-full bg-[#1a2332] flex items-center justify-center text-white font-semibold border-2 border-white shadow-md">
+                    <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white font-semibold border-2 border-white shadow-md">
                         {user?.name ? user.name.split(' ').map((n: string) => n[0]).join('') : 'FL'}
                     </div>
                 </div>
@@ -126,11 +127,22 @@ export const ExportList = () => {
                         </svg>
                     </div>
 
-                    <button
-                        className="bg-gray-900 hover:bg-gray-800 text-white text-xs font-bold py-2.5 px-6 rounded-xl uppercase tracking-wider transition-colors shadow-sm ml-auto"
-                    >
-                        DEFAULT
-                    </button>
+                    <div className="flex items-center gap-2 ml-auto">
+                        <button
+                            className="bg-gray-900 hover:bg-gray-800 text-white text-xs font-bold py-2.5 px-6 rounded-xl uppercase tracking-wider transition-colors shadow-sm"
+                        >
+                            DEFAULT
+                        </button>
+                        <button
+                            onClick={() => setIsEncodeModalOpen(true)}
+                            className="w-10 h-10 bg-black hover:bg-gray-900 text-white rounded-xl flex items-center justify-center shadow-sm transition-colors border border-white/10"
+                            title="Encode new transaction"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 6v12m6-6H6" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -225,7 +237,7 @@ export const ExportList = () => {
                                 </svg>
                             </button>
                             <div className="flex items-center gap-1">
-                                <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#1a2332] text-white text-sm font-bold">1</button>
+                                <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-black text-white text-sm font-bold">1</button>
                                 <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-900 text-sm font-bold transition-colors">2</button>
                                 <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-900 text-sm font-bold transition-colors">3</button>
                                 <span className="text-gray-900 px-1 font-bold">...</span>
@@ -249,6 +261,16 @@ export const ExportList = () => {
                 message={confirmModal.message}
                 confirmText={confirmModal.confirmText}
                 confirmButtonClass={confirmModal.confirmButtonClass}
+            />
+
+            <EncodeModal
+                isOpen={isEncodeModalOpen}
+                onClose={() => setIsEncodeModalOpen(false)}
+                type="export"
+                onSave={(data) => {
+                    console.log('Encoded Export:', data);
+                    // Here you would typically send data to your backend
+                }}
             />
         </div>
     );

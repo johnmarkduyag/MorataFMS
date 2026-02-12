@@ -52,29 +52,29 @@ export const MainLayout = () => {
     ];
 
     const settingsItems = [
-        { label: 'Profile', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' },
-        { label: 'Help', icon: 'M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
-        { label: 'Notifications', icon: 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9' },
+        { label: 'Profile', path: '/profile', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' },
+        { label: 'Help', path: '/help', icon: 'M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
+        { label: 'Notifications', path: '/notifications', icon: 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9' },
     ];
 
     const isDetailsPage = location.pathname.startsWith('/tracking');
 
     return (
-        <div className="bg-[#1a2332] min-h-screen flex text-gray-900 overflow-hidden">
+        <div className="bg-black min-h-screen flex text-gray-900 overflow-hidden">
 
             {/* Sidebar */}
-            <aside className={`w-56 bg-[#1a2332] min-h-screen flex flex-col py-6 px-4 shrink-0 transition-all ${isDetailsPage ? 'fixed h-full z-10' : ''}`}>
+            <aside className={`w-56 bg-black min-h-screen flex flex-col py-6 px-4 shrink-0 transition-all ${isDetailsPage ? 'fixed h-full z-10' : ''}`}>
                 {/* Logo */}
-                <div className="flex items-center gap-2 px-2 mb-8 cursor-pointer" onClick={() => navigate('/dashboard')}>
+                <div className="flex items-center gap-2 px-2 mb-8 cursor-pointer" onClick={() => navigate('/')}>
                     <div className="w-8 h-8">
                         <svg viewBox="0 0 64 64" className="w-full h-full">
-                            <circle cx="32" cy="32" r="30" fill="#1e3a5f" stroke="#c41e3a" strokeWidth="2" />
+                            <circle cx="32" cy="32" r="30" fill="#000000" stroke="#c41e3a" strokeWidth="2" />
                             <path d="M20 32 Q32 20 44 32 Q32 44 20 32" fill="#c41e3a" />
                             <circle cx="32" cy="32" r="8" fill="white" />
                             <path d="M28 28 L36 36 M36 28 L28 36" stroke="#1e3a5f" strokeWidth="2" />
                         </svg>
                     </div>
-                    <span className="text-white font-bold text-sm">F.M. Morata</span>
+                    <span className="text-white font-bold text-sm">F.M Morata</span>
                 </div>
 
                 {/* Main Menu */}
@@ -102,16 +102,17 @@ export const MainLayout = () => {
                     <p className="text-gray-400 text-[10px] uppercase tracking-wider px-2 mb-3 font-semibold">Settings</p>
                     <nav className="space-y-1">
                         {settingsItems.map((item) => (
-                            <a
+                            <button
                                 key={item.label}
-                                href="#"
-                                className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 text-sm hover:bg-white/5 transition-colors"
+                                onClick={() => navigate(item.path)}
+                                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${location.pathname === item.path ? 'bg-white/10 text-white' : 'text-gray-300 hover:bg-white/5'
+                                    }`}
                             >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={item.icon} />
                                 </svg>
                                 {item.label}
-                            </a>
+                            </button>
                         ))}
                     </nav>
                 </div>

@@ -46,7 +46,7 @@ export const Documents = () => {
             name: 'Import_Manifest_Nov2025.pdf',
             date: 'Nov 20, 2025',
             uploadDate: 'Nov 23, 2025',
-            uploader: { name: 'John Doe', initials: 'JD', role: 'Admin', color: 'bg-[#1a2332]' },
+            uploader: { name: 'John Doe', initials: 'JD', role: 'Admin', color: 'bg-black' },
             size: '2.4 MB',
             type: 'pdf',
             iconColor: 'bg-red-50 text-red-500',
@@ -136,7 +136,7 @@ export const Documents = () => {
                             <p className="text-sm font-bold text-gray-900">{user?.name || 'FirstN LastN'}</p>
                             <p className="text-xs text-gray-500">Document in charge</p>
                         </div>
-                        <div className="w-10 h-10 rounded-full bg-[#1a2332] flex items-center justify-center text-white font-semibold shadow-sm border-2 border-white">
+                        <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white font-semibold shadow-sm border-2 border-white">
                             {user?.name ? user.name.split(' ').map((n) => n[0]).join('') : 'FL'}
                         </div>
                     </div>
@@ -209,7 +209,7 @@ export const Documents = () => {
                     <button
                         type="button"
                         onClick={() => setIsUploadModalOpen(true)}
-                        className="flex items-center gap-2 bg-[#1a2332] text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-[#2a3342] transition-colors shadow-sm"
+                        className="flex items-center gap-2 bg-black text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-gray-900 transition-colors shadow-sm"
                     >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
@@ -229,7 +229,7 @@ export const Documents = () => {
                                     <div className="relative flex items-center justify-center group">
                                         <input
                                             type="checkbox"
-                                            className="peer w-5 h-5 rounded border-2 border-gray-900 text-transparent focus:ring-0 cursor-pointer appearance-none bg-white checked:bg-[#1a2332] checked:border-[#1a2332] transition-all shadow-md group-hover:border-blue-500"
+                                            className="peer w-5 h-5 rounded border-2 border-gray-900 text-transparent focus:ring-0 cursor-pointer appearance-none bg-white checked:bg-black checked:border-black transition-all shadow-md group-hover:border-blue-500"
                                             checked={files.length > 0 && selectedFiles.length === files.length}
                                             onChange={handleSelectAll}
                                         />
@@ -257,7 +257,7 @@ export const Documents = () => {
                                         <div className="relative flex items-center justify-center group">
                                             <input
                                                 type="checkbox"
-                                                className="peer w-5 h-5 rounded border-2 border-gray-900 text-transparent focus:ring-0 cursor-pointer appearance-none bg-white checked:bg-[#1a2332] checked:border-[#1a2332] transition-all shadow-md group-hover:border-blue-500"
+                                                className="peer w-5 h-5 rounded border-2 border-gray-900 text-transparent focus:ring-0 cursor-pointer appearance-none bg-white checked:bg-black checked:border-black transition-all shadow-md group-hover:border-blue-500"
                                                 checked={selectedFiles.includes(file.id)}
                                                 onChange={(e) => handleSelectOne(e, file.id)}
                                             />
@@ -351,7 +351,7 @@ export const Documents = () => {
                     <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden mx-4 animate-in fade-in zoom-in duration-200">
                         <div className="flex items-center justify-between p-4 border-b border-gray-100">
                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-lg bg-[#1a2332] flex items-center justify-center text-white shadow-sm">
+                                <div className="w-10 h-10 rounded-lg bg-black flex items-center justify-center text-white shadow-sm">
                                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                                     </svg>
@@ -434,7 +434,7 @@ export const Documents = () => {
                                         </button>
                                     </div>
                                     <div className="relative w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                                        <div className="absolute top-0 left-0 h-full bg-[#1a2332] w-3/4 rounded-full transition-all duration-300"></div>
+                                        <div className="absolute top-0 left-0 h-full bg-black w-3/4 rounded-full transition-all duration-300"></div>
                                     </div>
                                     <div className="flex justify-end mt-1">
                                         <span className="text-[10px] font-bold text-gray-600">75%</span>

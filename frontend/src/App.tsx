@@ -1,14 +1,17 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './features/auth';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthPage } from './features/auth/components/AuthPage';
 import { Documents, ExportList, ImportList, MainLayout, TrackingDetails } from './features/tracking';
+import NotFoundPage from './components/NotFoundPage';
+import LandingPage from './components/LandingPage';
 
 function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
         <Routes>
+          <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<AuthPage />} />
           <Route path="/signup" element={<AuthPage />} />
 
@@ -20,8 +23,11 @@ function App() {
             <Route path="/tracking/:referenceId" element={<TrackingDetails />} />
           </Route>
 
-          {/* Redirect root ("/") to login for now */}
-          <Route path="/" element={<Navigate to="/login" replace />} />
+          {/* 404 Pages (Full Screen) */}
+          <Route path="/profile" element={<NotFoundPage />} />
+          <Route path="/help" element={<NotFoundPage />} />
+          <Route path="/notifications" element={<NotFoundPage />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </AuthProvider>
     </ThemeProvider>
