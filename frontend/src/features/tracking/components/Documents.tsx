@@ -220,7 +220,7 @@ export const Documents = () => {
             </div>
 
             {/* File List Card */}
-            <div className="bg-white rounded-[2rem] border border-gray-200 shadow-sm transition-colors overflow-hidden">
+            <div className="bg-white rounded-[2rem] border border-gray-100 shadow-sm transition-colors overflow-hidden">
                 <div className="p-6 overflow-x-auto">
                     <table className="w-full text-left border-collapse min-w-[800px]">
                         <thead>
