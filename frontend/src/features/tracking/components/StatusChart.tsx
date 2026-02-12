@@ -7,18 +7,18 @@ export const StatusChart = ({ data }: StatusChartProps) => {
     const sortedData = [...data].sort((a, b) => b.value - a.value);
 
     // Calculate chart dimensions
-    const size = 200;
+    const size = 150;
     const center = size / 2;
-    const baseRadius = 85;
-    const strokeWidth = 14;
+    const baseRadius = 65;
+    const strokeWidth = 10;
     const spacing = 4;
 
     return (
-        <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100 h-full flex flex-col">
-            <h3 className="text-sm font-bold text-gray-900 mb-6">Status Overview</h3>
-            <div className="flex flex-col lg:flex-row items-center justify-center gap-8 flex-1">
+        <div className="bg-white dark:bg-gray-800 rounded-[2rem] p-5 shadow-sm border border-gray-100 dark:border-black h-full flex flex-col">
+            <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-4">Status Overview</h3>
+            <div className="flex flex-row items-center justify-center gap-2 flex-1">
                 {/* Activity Rings Chart */}
-                <div className="relative w-48 h-48 flex-shrink-0">
+                <div className="relative w-36 h-36 flex-shrink-0">
                     <svg
                         width={size}
                         height={size}
@@ -63,16 +63,16 @@ export const StatusChart = ({ data }: StatusChartProps) => {
                 </div>
 
                 {/* Pill Legend */}
-                <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-6 w-full lg:w-auto">
+                <div className="flex-1 grid grid-cols-1 gap-y-2 w-full min-w-0">
                     {sortedData.map((item, i) => (
-                        <div key={i} className="flex items-center gap-3">
+                        <div key={i} className="flex items-center gap-2">
                             <div
-                                className="w-8 h-2.5 rounded-full flex-shrink-0 shadow-sm"
+                                className="w-6 h-2 rounded-full flex-shrink-0 shadow-sm"
                                 style={{ backgroundColor: item.color }}
                             ></div>
-                            <div className="min-w-0">
-                                <p className="text-gray-900 font-bold text-xs truncate uppercase tracking-tight">{item.label}</p>
-                                <p className="text-slate-400 font-semibold text-[10px]">{item.value} Units</p>
+                            <div className="min-w-0 overflow-hidden">
+                                <p className="text-gray-900 dark:text-white font-bold text-[10px] truncate uppercase tracking-tight leading-none">{item.label}</p>
+                                <p className="text-slate-400 dark:text-gray-400 font-semibold text-[9px] leading-none">{item.value} Units</p>
                             </div>
                         </div>
                     ))}

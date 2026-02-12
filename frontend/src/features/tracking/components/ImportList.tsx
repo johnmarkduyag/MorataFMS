@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { StatusChart } from './StatusChart';
+import { CalendarCard } from './CalendarCard';
 import { ConfirmationModal } from '../../../components/ConfirmationModal';
 
 
@@ -61,8 +62,8 @@ export const ImportList = () => {
             {/* Header */}
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Import Transactions</h1>
-                    <p className="text-sm text-gray-900 font-bold">Dashboard / Import Transactions</p>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Import Transactions</h1>
+                    <p className="text-sm text-gray-900 dark:text-gray-300 font-bold">Dashboard / Import Transactions</p>
                 </div>
 
                 <div className="flex items-center gap-4">
@@ -72,8 +73,8 @@ export const ImportList = () => {
                         </svg>
                     </button>
                     <div className="text-right">
-                        <p className="text-sm font-semibold text-gray-900">{user?.name || 'FirstN LastN'}</p>
-                        <p className="text-xs text-gray-500">Document In Charge</p>
+                        <p className="text-sm font-semibold text-gray-900 dark:text-white">{user?.name || 'FirstN LastN'}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Document In Charge</p>
                     </div>
                     <div className="w-10 h-10 rounded-full bg-[#1a2332] flex items-center justify-center text-white font-semibold border-2 border-white shadow-md">
                         {user?.name ? user.name.split(' ').map((n: string) => n[0]).join('') : 'FL'}
@@ -81,40 +82,34 @@ export const ImportList = () => {
                 </div>
             </div>
 
-            {/* Stats Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
-                {/* Time & Date Cards - Stacked vertically */}
-                <div className="flex flex-col gap-6">
-                    {/* Time Card */}
-                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-sky-50 dark:to-blue-100 rounded-[2rem] p-6 border border-blue-100 dark:border-blue-200 flex-1 shadow-sm">
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="p-2 bg-blue-100 dark:bg-white/50 rounded-xl">
-                                <svg className="w-5 h-5 text-blue-600 dark:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </div>
-                            <span className="text-sm font-medium text-gray-600">Current Time</span>
-                        </div>
-                        <p className="text-3xl font-bold text-gray-900 mb-1">{dateTime.time}</p>
-                        <p className="text-sm text-gray-600">Manila, Philippines</p>
-                    </div>
+            {/* Stats Row - 3 Columns */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+                {/* 1. Time Card */}
+                <div className="bg-blue-50 dark:bg-gray-800 rounded-[2rem] p-5 border border-blue-100 dark:border-black shadow-sm flex flex-col items-center justify-center text-center h-full">
+                    <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-1 tracking-tight">
+                        {dateTime.time}
+                    </h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-4">
+                        {dateTime.date}
+                    </p>
 
-                    {/* Date Card */}
-                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-sky-50 dark:to-blue-100 rounded-[2rem] p-6 border border-blue-100 dark:border-blue-200 flex-1 shadow-sm">
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="p-2 bg-blue-100 dark:bg-white/50 rounded-xl">
-                                <svg className="w-5 h-5 text-blue-600 dark:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                            </div>
-                            <span className="text-sm font-medium text-gray-600">Today's Date</span>
-                        </div>
-                        <p className="text-3xl font-bold text-gray-900 mb-1">{dateTime.date}</p>
-                        <p className="text-sm text-gray-600">Manila, Philippines</p>
+                    <div className="w-full border-t border-blue-100 dark:border-black my-2"></div>
+
+                    <div className="flex items-center gap-2 mt-2 text-gray-600 dark:text-gray-300 font-bold text-xs">
+                        <svg className="w-4 h-4 text-[#c41e3a]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        Manila, Philippines
                     </div>
                 </div>
 
-                {/* Status Chart */}
+                {/* 2. Calendar Card */}
+                <div className="h-full">
+                    <CalendarCard className="bg-blue-50 border-blue-100" />
+                </div>
+
+                {/* 3. Status Chart (Untouched) */}
                 <div className="h-full">
                     <StatusChart data={chartData} />
                 </div>
@@ -127,7 +122,7 @@ export const ImportList = () => {
                         <input
                             type="text"
                             placeholder="Search anything"
-                            className="pl-10 pr-4 py-2 bg-white rounded-2xl border border-gray-200 text-sm w-64 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-gray-900 font-medium"
+                            className="pl-10 pr-4 py-2 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 text-sm w-64 focus:ring-2 focus:ring-gray-500 focus:border-transparent outline-none text-gray-900 dark:text-white font-medium"
                         />
                         <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -139,7 +134,7 @@ export const ImportList = () => {
                         </svg>
                         <button
                             onClick={() => setOpenDropdown(openDropdown === 'filter' ? null : 'filter')}
-                            className="pl-9 pr-8 py-2 text-sm rounded-2xl border border-gray-200 bg-white text-slate-500 font-bold min-w-[100px] text-left relative flex items-center justify-between focus:outline-none transition-all hover:border-gray-300"
+                            className="pl-9 pr-8 py-2 text-sm rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-slate-500 dark:text-gray-300 font-bold min-w-[100px] text-left relative flex items-center justify-between focus:outline-none transition-all hover:border-gray-300 dark:hover:border-gray-600"
                         >
                             {filterType || 'Filter'}
                             <svg className="w-4 h-4 ml-2 text-gray-600 absolute right-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -168,7 +163,7 @@ export const ImportList = () => {
                     <div className="relative">
                         <button
                             onClick={() => setOpenDropdown(openDropdown === 'colour' ? null : 'colour')}
-                            className="pr-8 py-2 pl-3 text-sm rounded-2xl border border-gray-200 bg-white text-slate-500 font-bold min-w-[140px] text-left relative flex items-center justify-between focus:outline-none transition-all hover:border-gray-300"
+                            className="pr-8 py-2 pl-3 text-sm rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-slate-500 dark:text-gray-300 font-bold min-w-[140px] text-left relative flex items-center justify-between focus:outline-none transition-all hover:border-gray-300 dark:hover:border-gray-600"
                         >
                             {filterValue || 'Colour'}
                             <svg className="w-4 h-4 ml-2 text-gray-600 absolute right-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -211,7 +206,7 @@ export const ImportList = () => {
 
                     <button
                         onClick={handleReset}
-                        className="bg-gray-900 hover:bg-gray-800 text-white text-xs font-bold py-2.5 px-6 rounded-xl uppercase tracking-wider transition-colors shadow-sm ml-auto"
+                        className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-slate-500 dark:text-gray-300 text-xs font-bold py-2.5 px-6 rounded-xl uppercase tracking-wider transition-all hover:border-gray-300 dark:hover:border-gray-600 shadow-sm ml-auto"
                     >
                         DEFAULT
                     </button>
@@ -219,18 +214,18 @@ export const ImportList = () => {
             </div>
 
             {/* Transaction List Card */}
-            <div className="bg-white rounded-[2rem] border border-gray-100 shadow-sm transition-colors overflow-hidden">
+            <div className="bg-white dark:bg-gray-800 rounded-[2rem] border border-gray-100 dark:border-black shadow-sm transition-colors overflow-hidden">
                 <div className="p-6">
                     {/* Table Header */}
                     <div className="grid gap-4 pb-3 border-b border-gray-100 mb-3 px-2 font-bold"
                         style={{ gridTemplateColumns: '50px 1.2fr 1.2fr 1fr 1.5fr 1fr 80px' }}>
-                        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">BLSC</span>
-                        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Customs Ref No.</span>
-                        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Bill of Lading</span>
-                        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Status</span>
-                        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Importer</span>
-                        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Arrival Date</span>
-                        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Actions</span>
+                        <span className="text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wider">BLSC</span>
+                        <span className="text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wider">Customs Ref No.</span>
+                        <span className="text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wider">Bill of Lading</span>
+                        <span className="text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wider">Status</span>
+                        <span className="text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wider">Importer</span>
+                        <span className="text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wider">Arrival Date</span>
+                        <span className="text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wider text-right">Actions</span>
                     </div>
 
                     {/* Table Rows */}
@@ -239,12 +234,12 @@ export const ImportList = () => {
                             <div
                                 key={i}
                                 onClick={() => navigate('/tracking/REF-2024-001')}
-                                className="grid gap-4 py-2 items-center cursor-pointer rounded-xl transition-all duration-200 px-2 hover:bg-gray-50 hover:shadow-sm"
+                                className="grid gap-4 py-2 items-center cursor-pointer rounded-xl transition-all duration-200 px-2 hover:bg-gray-50 dark:hover:bg-gray-700 hover:shadow-sm"
                                 style={{ gridTemplateColumns: '50px 1.2fr 1.2fr 1fr 1.5fr 1fr 80px' }}
                             >
                                 <span className={`w-2.5 h-2.5 rounded-full ${row.color}`}></span>
-                                <p className="text-sm text-gray-900 font-bold">{row.ref}</p>
-                                <p className="text-sm text-slate-500 font-bold">{row.bl}</p>
+                                <p className="text-sm text-gray-900 dark:text-white font-bold">{row.ref}</p>
+                                <p className="text-sm text-slate-500 dark:text-gray-400 font-bold">{row.bl}</p>
                                 <span className="inline-flex">
                                     <span
                                         className="px-2.5 py-0.5 rounded-full text-[10px] font-black text-white uppercase tracking-wider shadow-sm border border-black/5"
@@ -257,11 +252,11 @@ export const ImportList = () => {
                                         {row.status}
                                     </span>
                                 </span>
-                                <p className="text-sm text-slate-500 font-bold">{row.importer}</p>
-                                <p className="text-sm text-slate-500 font-bold">{row.date}</p>
+                                <p className="text-sm text-slate-500 dark:text-gray-400 font-bold">{row.importer}</p>
+                                <p className="text-sm text-slate-500 dark:text-gray-400 font-bold">{row.date}</p>
                                 <div className="flex justify-end gap-2">
                                     <button
-                                        className="p-1.5 text-blue-600 hover:bg-blue-50 rounded"
+                                        className="p-1.5 text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded transition-colors"
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             setConfirmModal({
@@ -269,7 +264,7 @@ export const ImportList = () => {
                                                 title: 'Edit Transaction',
                                                 message: 'Are you sure you want to edit this transaction?',
                                                 confirmText: 'Confirm Edit',
-                                                confirmButtonClass: 'bg-blue-600 hover:bg-blue-700',
+                                                confirmButtonClass: 'bg-gray-900 hover:bg-black',
                                                 onConfirm: () => {
                                                     navigate(`/tracking/${row.ref}`);
                                                 }
@@ -294,7 +289,7 @@ export const ImportList = () => {
                                                 }
                                             });
                                         }}
-                                        className="p-1.5 text-red-600 hover:bg-red-50 rounded"
+                                        className="p-1.5 text-gray-600 hover:bg-red-50 hover:text-red-600 rounded transition-colors"
                                     >
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 
@@ -307,15 +302,15 @@ export const ImportList = () => {
                     </div>
 
                     {/* Table Pagination */}
-                    <div className="mt-6 flex items-center justify-between border-t border-gray-100 pt-6 px-2">
+                    <div className="mt-6 flex items-center justify-between border-t border-gray-100 dark:border-black pt-6 px-2">
                         <div className="flex items-center gap-2">
-                            <span className="text-sm text-gray-900 font-bold">Show</span>
-                            <select className="bg-gray-50 border border-gray-200 text-gray-900 text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 p-1 px-2 outline-none cursor-pointer font-bold">
+                            <span className="text-sm text-gray-900 dark:text-white font-bold">Show</span>
+                            <select className="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white text-xs rounded-lg focus:ring-gray-500 focus:border-gray-500 p-1 px-2 outline-none cursor-pointer font-bold">
                                 <option value="5">5</option>
                                 <option value="10">10</option>
                                 <option value="25">25</option>
                             </select>
-                            <span className="text-sm text-gray-900 font-bold">of 100 pages</span>
+                            <span className="text-sm text-gray-900 dark:text-white font-bold">of 100 pages</span>
                         </div>
                         <div className="flex items-center gap-2">
                             <button className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
@@ -324,11 +319,11 @@ export const ImportList = () => {
                                 </svg>
                             </button>
                             <div className="flex items-center gap-1">
-                                <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#1a2332] text-white text-sm font-bold">1</button>
-                                <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-900 text-sm font-bold transition-colors">2</button>
-                                <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-900 text-sm font-bold transition-colors">3</button>
-                                <span className="text-gray-900 px-1 font-bold">...</span>
-                                <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-900 text-sm font-bold transition-colors">16</button>
+                                <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#1a2332] dark:bg-gray-600 text-white text-sm font-bold">1</button>
+                                <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-white text-sm font-bold transition-colors">2</button>
+                                <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-white text-sm font-bold transition-colors">3</button>
+                                <span className="text-gray-900 dark:text-white px-1 font-bold">...</span>
+                                <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-white text-sm font-bold transition-colors">16</button>
                             </div>
                             <button className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
