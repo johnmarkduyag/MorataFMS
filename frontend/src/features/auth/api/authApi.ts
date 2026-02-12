@@ -1,20 +1,10 @@
 import api from '../../../lib/axios';
-<<<<<<< HEAD
-import type { AuthResponse, LoginCredentials, User } from '../types/auth.types';
-
-
-=======
 import type { AuthResponse, LoginCredentials, RegisterCredentials, User } from '../types/auth.types';
->>>>>>> testing
 
 export const authApi = {
     // Get CSRF cookie (required before login/register)
     async getCsrfCookie(): Promise<void> {
-<<<<<<< HEAD
-        await api.get('/sanctum/csrf-cookie');
-=======
         await api.get(`/sanctum/csrf-cookie`);
->>>>>>> testing
     },
 
     // Login user
