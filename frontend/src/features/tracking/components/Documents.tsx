@@ -271,7 +271,7 @@ export const Documents = () => {
                 </div>
                 <div className="flex items-center gap-3">
                     {/* User Profile */}
-                    <div className="flex items-center gap-3 ml-4 pl-4 border-l border-gray-200 dark:border-zinc-800">
+                    <div className="flex items-center gap-3 ml-4 pl-4 border-l border-gray-200 dark:border-gray-800">
                         <div className="text-right">
                             <p className="text-sm font-bold text-gray-900 dark:text-white">{user?.name || 'FirstN LastN'}</p>
                             <p className="text-xs text-gray-500 dark:text-gray-400">Document in charge</p>
@@ -329,11 +329,11 @@ export const Documents = () => {
             </div>
 
             {/* File List Card */}
-            <div className="bg-white dark:bg-gray-800 rounded-[2rem] border border-gray-100 dark:border-black shadow-sm transition-colors overflow-hidden">
+            <div className="bg-white dark:bg-gray-900 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm transition-colors overflow-hidden">
                 <div className="p-6 overflow-x-auto">
                     <table className="w-full text-left border-collapse min-w-[800px]">
                         <thead>
-                            <tr className="border-b border-gray-100 dark:border-black text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wider">
+                            <tr className="border-b border-gray-100 dark:border-gray-800 text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wider">
                                 <th className="py-3 px-2 w-8">
                                     <div className="relative flex items-center justify-center group">
                                         <input
@@ -360,7 +360,7 @@ export const Documents = () => {
                                 <tr
                                     key={file.id}
                                     onClick={() => handleFileClick(file)}
-                                    className={`border-b border-gray-50 dark:border-zinc-900 cursor-pointer transition-all duration-200 hover:bg-gray-50 dark:hover:bg-zinc-900 hover:shadow-sm ${selectedFiles.includes(file.id) ? 'bg-blue-50 dark:bg-zinc-800' : ''}`}
+                                    className={`border-b border-gray-50 dark:border-gray-800 cursor-pointer transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-800 hover:shadow-sm ${selectedFiles.includes(file.id) ? 'bg-blue-50 dark:bg-gray-800' : ''}`}
                                 >
                                     <td className="py-3 px-2" onClick={(e) => e.stopPropagation()}>
                                         <div className="relative flex items-center justify-center group">
@@ -431,7 +431,7 @@ export const Documents = () => {
                 </div>
 
                 {selectedFiles.length > 0 && (
-                    <div className="px-6 py-4 border-t border-gray-100 dark:border-black bg-gray-50 dark:bg-zinc-900 flex items-center justify-between animate-in slide-in-from-top-2 duration-200">
+                    <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 flex items-center justify-between animate-in slide-in-from-top-2 duration-200">
                         <span className="text-sm text-gray-900 dark:text-white font-bold">{selectedFiles.length} files selected</span>
                         <div className="flex items-center gap-3">
                             <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:text-blue-600 transition-colors flex items-center gap-2">
@@ -455,7 +455,7 @@ export const Documents = () => {
 
                 {/* Pagination Controls */}
                 {totalPages > 1 && (
-                    <div className="px-6 py-4 border-t border-gray-100 dark:border-black flex items-center justify-between">
+                    <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
                         <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                             <span>Show</span>
                             <select

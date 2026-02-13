@@ -63,23 +63,21 @@ export const MainLayout = () => {
         { label: 'Notifications', icon: 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9' },
     ];
 
-    const isDetailsPage = location.pathname.startsWith('/tracking');
+
 
     return (
-        <div className={`min-h-screen flex text-gray-900 dark:text-gray-50 overflow-hidden font-sans transition-colors duration-300 ease-in-out ${
-            theme === 'dark' ? 'bg-gray-950' : 'bg-gray-50'
-        } ${theme === 'mix' ? '!bg-gray-950' : ''}`}>
+        <div className={`h-screen flex text-gray-900 dark:text-gray-50 overflow-hidden font-sans transition-colors duration-300 ease-in-out ${
+            theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'
+        } ${theme === 'mix' ? '!bg-gray-900' : ''}`}>
 
             {/* Sidebar */}
-            <aside className={`w-64 min-h-screen flex flex-col py-6 px-4 shrink-0 transition-all duration-300 ease-in-out ${
-                isDetailsPage ? 'fixed h-full z-10' : ''
-            } ${
+            <aside className={`w-64 h-full flex flex-col pt-8 pb-6 px-4 shrink-0 overflow-y-auto transition-all duration-300 ease-in-out ${
                 theme === 'light' ? 'bg-white border-r border-gray-100' : 
                 theme === 'dark' ? 'bg-gray-900' : // Removed border-r border-gray-800
                 'dark bg-gray-900 border-none text-white' // mix mode
             }`}>
                 {/* Logo */}
-                <div className="flex items-center gap-3 px-2 mb-10 cursor-pointer" onClick={() => navigate('/dashboard')}>
+                <div className="flex items-center gap-3 px-2 mb-6 cursor-pointer" onClick={() => navigate('/dashboard')}>
                     <div className="w-8 h-8 flex-shrink-0 text-blue-600 dark:text-white">
                         <svg viewBox="0 0 64 64" className="w-full h-full">
                             <circle cx="32" cy="32" r="30" fill="currentColor" className="text-gray-900 dark:text-white" />
@@ -177,9 +175,9 @@ export const MainLayout = () => {
             </aside>
 
             {/* Main Content Area - Separated Card Layout */}
-            <main className={`flex-1 overflow-y-auto relative m-4 rounded-[2.5rem] shadow-2xl transition-all duration-300 ease-in-out ${
+            <main className={`flex-1 overflow-y-auto relative m-2 rounded-2xl shadow-2xl transition-all duration-300 ease-in-out ${
                 theme === 'dark' ? 'bg-gray-900' : 'bg-white'
-            } p-8 ${isDetailsPage ? 'ml-64' : ''}`}>
+            } p-6 `}>
                 {/* Page Content */}
                 <Outlet context={{ user, dateTime }} />
             </main>
