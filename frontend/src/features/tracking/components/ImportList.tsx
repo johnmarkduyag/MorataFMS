@@ -4,7 +4,7 @@ import { ConfirmationModal } from '../../../components/ConfirmationModal';
 import { Calendar } from './Calendar';
 import { EncodeModal } from './EncodeModal';
 import { useTheme } from '../../../context/ThemeContext';
-import { StatusChart } from './StatusChart';
+
 
 interface LayoutContext {
     user?: { name: string; role: string };
@@ -44,18 +44,7 @@ export const ImportList = () => {
     ];
 
 
-    // Calculate status counts for chart
-    const statusCounts = data.reduce((acc, item) => {
-        acc[item.status] = (acc[item.status] || 0) + 1;
-        return acc;
-    }, {} as Record<string, number>);
 
-    const chartData = [
-        { label: 'Cleared', value: statusCounts['Cleared'] || 0, color: '#4cd964' },
-        { label: 'Pending', value: statusCounts['Pending'] || 0, color: '#ffcc00' },
-        { label: 'Delayed', value: statusCounts['Delayed'] || 0, color: '#ff2d55' },
-        { label: 'In Transit', value: statusCounts['In Transit'] || 0, color: '#00d2ff' },
-    ];
 
 
     const handleReset = () => {

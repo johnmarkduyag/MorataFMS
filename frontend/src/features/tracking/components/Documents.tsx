@@ -379,7 +379,7 @@ export const Documents = () => {
                         </thead>
                         <tbody className={`text-sm font-medium ${theme === 'dark' || theme === 'mix' ? 'text-gray-300' : 'text-gray-900'
                             }`}>
-                            {files.map((file) => (
+                            {currentFiles.map((file) => (
                                 <tr
                                     key={file.id}
                                     onClick={() => handleFileClick(file)}
