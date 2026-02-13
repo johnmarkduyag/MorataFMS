@@ -31,3 +31,12 @@ export interface FileData {
     type: 'pdf' | 'docx' | 'jpg';
     iconColor: string;
 }
+
+export interface EncodeFormData {
+    ref: string;
+    bl: string;
+    party: string;       // importer (import) or shipper (export)
+    status?: string;     // import only
+    blsc?: string;       // import only (selective color)
+    extra?: string;      // arrival date (import) or vessel (export)
+}

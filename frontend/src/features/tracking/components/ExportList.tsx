@@ -5,6 +5,7 @@ import { useConfirmationModal } from '../../../hooks/useConfirmationModal';
 import { mockTrackingApi } from '../api/mockTrackingApi';
 import type { ExportTransaction, LayoutContext } from '../types';
 import { CalendarCard } from './CalendarCard';
+import { EncodeModal } from './EncodeModal';
 import { StatusChart } from './StatusChart';
 
 import { Icon } from '../../../components/Icon';
@@ -14,6 +15,7 @@ import { PageHeader } from './shared/PageHeader';
 export const ExportList = () => {
     const navigate = useNavigate();
     const { openModal, modalProps } = useConfirmationModal();
+    const [isEncodeModalOpen, setIsEncodeModalOpen] = useState(false);
 
 
     const { user, dateTime } = useOutletContext<LayoutContext>();
@@ -161,6 +163,14 @@ export const ExportList = () => {
                             </div>
                         )}
                     </div>
+
+                    <button
+                        onClick={() => setIsEncodeModalOpen(true)}
+                        className="w-10 h-10 bg-blue-600 hover:bg-blue-700 text-white rounded-xl flex items-center justify-center shadow-sm transition-all border border-blue-700/20"
+                        title="Encode new transaction"
+                    >
+                        <Icon name="plus" className="w-5 h-5" />
+                    </button>
                 </div>
             </div>
 
@@ -242,6 +252,16 @@ export const ExportList = () => {
 
             <ConfirmationModal
                 {...modalProps}
+            />
+
+            <EncodeModal
+                isOpen={isEncodeModalOpen}
+                onClose={() => setIsEncodeModalOpen(false)}
+                type="export"
+                onSave={(data) => {
+                    console.log('Encoded Export:', data);
+                    // TODO: Send data to backend API
+                }}
             />
         </div>
     );

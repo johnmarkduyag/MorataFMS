@@ -5,6 +5,7 @@ import { useConfirmationModal } from '../../../hooks/useConfirmationModal';
 import { mockTrackingApi } from '../api/mockTrackingApi';
 import type { ImportTransaction, LayoutContext } from '../types';
 import { CalendarCard } from './CalendarCard';
+import { EncodeModal } from './EncodeModal';
 import { StatusChart } from './StatusChart';
 
 import { Icon } from '../../../components/Icon';
@@ -16,6 +17,7 @@ export const ImportList = () => {
     const [filterType, setFilterType] = useState<string>('');
     const [filterValue, setFilterValue] = useState<string>('');
     const [openDropdown, setOpenDropdown] = useState<'filter' | 'colour' | null>(null);
+    const [isEncodeModalOpen, setIsEncodeModalOpen] = useState(false);
     const { openModal, modalProps } = useConfirmationModal();
 
     const [data, setData] = useState<ImportTransaction[]>([]);
@@ -203,12 +205,21 @@ export const ImportList = () => {
                         )}
                     </div>
 
-                    <button
-                        onClick={handleReset}
-                        className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-slate-500 dark:text-gray-300 text-xs font-bold py-2.5 px-6 rounded-xl uppercase tracking-wider transition-all hover:border-gray-300 dark:hover:border-gray-600 shadow-sm ml-auto"
-                    >
-                        DEFAULT
-                    </button>
+                    <div className="flex items-center gap-2 ml-auto">
+                        <button
+                            onClick={handleReset}
+                            className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-slate-500 dark:text-gray-300 text-xs font-bold py-2.5 px-6 rounded-xl uppercase tracking-wider transition-all hover:border-gray-300 dark:hover:border-gray-600 shadow-sm"
+                        >
+                            DEFAULT
+                        </button>
+                        <button
+                            onClick={() => setIsEncodeModalOpen(true)}
+                            className="w-10 h-10 bg-blue-600 hover:bg-blue-700 text-white rounded-xl flex items-center justify-center shadow-sm transition-all border border-blue-700/20"
+                            title="Encode new transaction"
+                        >
+                            <Icon name="plus" className="w-5 h-5" />
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -304,6 +315,16 @@ export const ImportList = () => {
 
             <ConfirmationModal
                 {...modalProps}
+            />
+
+            <EncodeModal
+                isOpen={isEncodeModalOpen}
+                onClose={() => setIsEncodeModalOpen(false)}
+                type="import"
+                onSave={(data) => {
+                    console.log('Encoded Import:', data);
+                    // TODO: Send data to backend API
+                }}
             />
         </div>
     );
