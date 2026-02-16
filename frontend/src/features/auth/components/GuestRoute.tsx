@@ -2,7 +2,7 @@ import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
 export function GuestRoute() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
 
   if (isLoading) {
     return (
@@ -13,7 +13,9 @@ export function GuestRoute() {
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
+    // Redirect to correct dashboard based on role
+    const redirectTo = user?.role === 'admin' ? '/admin' : '/dashboard';
+    return <Navigate to={redirectTo} replace />;
   }
 
   return <Outlet />;

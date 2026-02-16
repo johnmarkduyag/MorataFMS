@@ -1,8 +1,12 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
-export function ProtectedRoute() {
-  const { isAuthenticated, isLoading } = useAuth();
+interface ProtectedRouteProps {
+  allowedRoles?: string[];
+}
+
+export function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
+  const { isAuthenticated, isLoading, user } = useAuth();
   const location = useLocation();
 
   if (isLoading) {
@@ -14,8 +18,14 @@ export function ProtectedRoute() {
   }
 
   if (!isAuthenticated) {
-    // Redirect to login, but save the current location they were trying to access
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  // Role-based access control
+  if (allowedRoles && user && !allowedRoles.includes(user.role)) {
+    // Redirect to the correct dashboard based on role
+    const redirectTo = user.role === 'admin' ? '/admin' : '/dashboard';
+    return <Navigate to={redirectTo} replace />;
   }
 
   return <Outlet />;

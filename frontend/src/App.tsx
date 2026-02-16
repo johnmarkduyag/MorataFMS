@@ -1,8 +1,8 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { NotFoundPage } from './components/layout/NotFoundPage';
 import { ThemeProvider } from './context/ThemeContext';
-import { AuthProvider, GuestRoute, ProtectedRoute } from './features/auth';
+import { AuthProvider, GuestRoute, ProtectedRoute, RoleRedirect } from './features/auth';
 import { AuthPage } from './features/auth/components/AuthPage';
 import { Documents, ExportList, ImportList, MainLayout, Profile, TrackingDashboard, TrackingDetails } from './features/tracking';
 
@@ -15,11 +15,10 @@ function App() {
           {/* Guest-only routes */}
           <Route element={<GuestRoute />}>
             <Route path="/login" element={<AuthPage />} />
-            <Route path="/signup" element={<AuthPage />} />
           </Route>
 
-          {/* Protected routes */}
-          <Route element={<ProtectedRoute />}>
+          {/* Employee-only routes (encoder, broker, supervisor, manager) */}
+          <Route element={<ProtectedRoute allowedRoles={['encoder', 'broker', 'supervisor', 'manager']} />}>
             <Route element={<MainLayout />}>
               <Route path="/dashboard" element={<ImportList />} />
               <Route path="/export" element={<ExportList />} />
@@ -30,8 +29,13 @@ function App() {
             </Route>
           </Route>
 
-          {/* Default redirects & 404 */}
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          {/* Admin-only routes */}
+          <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+            <Route path="/admin" element={<div className="flex h-screen items-center justify-center text-gray-500 dark:text-gray-400"><p className="text-lg">Admin Panel — Coming Soon</p></div>} />
+          </Route>
+
+          {/* Smart redirect based on role */}
+          <Route path="/" element={<RoleRedirect />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </AuthProvider>
