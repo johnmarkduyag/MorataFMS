@@ -51,7 +51,7 @@ export const MainLayout = () => {
     };
 
     const navItems = [
-        { label: 'Tracking', path: '#', icon: 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z' },
+        { label: 'Tracking', path: '/tracking', icon: 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z' },
         { label: 'Import List', path: '/dashboard', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01' },
         { label: 'Export List', path: '/export', icon: 'M12 19l9 2-9-18-9 18 9-2zm0 0v-8' },
         { label: 'Documents', path: '/documents', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
@@ -75,11 +75,7 @@ export const MainLayout = () => {
                 {/* Logo */}
                 <div className="flex items-center gap-2 px-2 mb-8 cursor-pointer" onClick={() => navigate('/')}>
                     <div className="w-8 h-8">
-                        <svg viewBox="0 0 64 64" className="w-full h-full">
-                            <circle cx="32" cy="32" r="30" fill="#000000" stroke="#c41e3a" strokeWidth="2" />
-                            <path d="M20 32 Q32 20 44 32 Q32 44 20 32" fill="#c41e3a" />
-                            <circle cx="32" cy="32" r="8" fill="white" />
-                        </svg>
+                        <img src="/logo.jpg" alt="F.M Morata Logo" className="w-full h-full object-cover rounded-full" />
                     </div>
                     <span className={`font-bold text-sm ${theme === 'dark' || theme === 'mix' ? 'text-white' : 'text-black'
                         }`}>F.M Morata</span>
@@ -119,6 +115,7 @@ export const MainLayout = () => {
                         {settingsItems.map((item) => (
                             <button
                                 key={item.label}
+                                onClick={() => navigate(item.path)}
                                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm ${location.pathname === item.path
                                     ? theme === 'dark' || theme === 'mix'
                                         ? 'bg-white/10 text-white'
@@ -171,16 +168,16 @@ export const MainLayout = () => {
                         Sign Out
                     </button>
                 </div>
-            </aside>
+            </aside >
 
             {/* Main Content Area - Rounded Card Look */}
-            <main className={`flex-1 overflow-y-auto p-8 m-4 rounded-[2.5rem] shadow-2xl relative border ${isDetailsPage ? 'ml-64' : ''} ${theme === 'dark' ? 'bg-black border-transparent' : 'bg-white border-white'
+            < main className={`flex-1 overflow-y-auto p-8 m-4 rounded-[2.5rem] shadow-2xl relative border ${isDetailsPage ? 'ml-64' : ''} ${theme === 'dark' ? 'bg-black border-transparent' : 'bg-white border-white'
                 }`}>
                 {/* Page Content */}
-                <div className="max-w-7xl mx-auto min-h-full">
+                < div className="max-w-7xl mx-auto min-h-full flex flex-col" >
                     <Outlet context={{ user, dateTime }} />
-                </div>
-            </main>
+                </div >
+            </main >
         </div >
     );
 };

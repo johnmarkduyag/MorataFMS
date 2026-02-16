@@ -6,7 +6,7 @@ const LandingPage: React.FC = () => {
     const { user } = useAuth();
 
     // Default values if user is not logged in
-    const userName = user?.name || 'Admin User';
+    const userName = user?.name || 'Test User';
     const userRole = 'Document In Charge';
     const initials = userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 
@@ -29,12 +29,7 @@ const LandingPage: React.FC = () => {
                 <header className="container mx-auto px-6 py-8 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <div className="w-12 h-12">
-                            <svg viewBox="0 0 64 64" className="w-full h-full">
-                                <circle cx="32" cy="32" r="30" fill="#000000" stroke="#c41e3a" strokeWidth="2" />
-                                <path d="M20 32 Q32 20 44 32 Q32 44 20 32" fill="#c41e3a" />
-                                <circle cx="32" cy="32" r="8" fill="white" />
-                                <path d="M28 28 L36 36 M36 28 L28 36" stroke="#000000" strokeWidth="2" />
-                            </svg>
+                            <img src="/logo.jpg" alt="F.M. Morata Logo" className="w-full h-full object-cover rounded-full" />
                         </div>
                         <div>
                             <h1 className="text-2xl font-black leading-none text-white uppercase tracking-wider">F.M. MORATA</h1>
@@ -74,7 +69,7 @@ const LandingPage: React.FC = () => {
 
                         <div className="flex flex-col sm:flex-row gap-6 items-start">
                             <button
-                                onClick={() => navigate('/login')}
+                                onClick={() => navigate('/tracking')}
                                 className="px-12 py-6 bg-white text-black rounded-full text-xl font-black tracking-wide hover:bg-gray-200 transition-all transform hover:scale-105 shadow-2xl"
                             >
                                 TRACKING NOW

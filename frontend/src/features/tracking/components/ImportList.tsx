@@ -97,12 +97,12 @@ export const ImportList = () => {
                     </button>
                     <div className="text-right">
                         <p className={`text-sm font-semibold transition-colors duration-300 ${theme === 'dark' ? 'text-white' : 'text-gray-900'
-                            }`}>{user?.name || 'FirstN LastN'}</p>
+                            }`}>{user?.name === 'Admin User' ? 'Test User' : (user?.name || 'Test User')}</p>
                         <p className={`text-xs transition-colors duration-300 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
                             }`}>Document In Charge</p>
                     </div>
                     <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white font-semibold border-2 border-white shadow-md">
-                        {user?.name ? user.name.split(' ').map((n: string) => n[0]).join('') : 'FL'}
+                        {user?.name ? user.name.split(' ').map((n: string) => n[0]).join('') : 'TU'}
                     </div>
                 </div>
             </div>

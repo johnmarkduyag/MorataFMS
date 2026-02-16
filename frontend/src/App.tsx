@@ -28,6 +28,7 @@ function App() {
           <Route path="/profile" element={<NotFoundPage />} />
           <Route path="/help" element={<NotFoundPage />} />
           <Route path="/notifications" element={<NotFoundPage />} />
+          <Route path="/tracking" element={<NotFoundPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </AuthProvider>

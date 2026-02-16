@@ -37,7 +37,7 @@ const NotFoundPage: React.FC = () => {
         <div className="flex-1 flex justify-start items-center pl-8">
           <div className="w-48 h-48 md:w-64 md:h-64 relative flex items-center justify-center">
             <div className="w-full h-full border-2 border-dashed border-white/40 rounded-full flex items-center justify-center bg-white/10 backdrop-blur-sm shadow-[0_0_30px_rgba(255,255,255,0.2)]">
-              <span className="text-sm uppercase tracking-[0.4em] text-white/60 font-bold text-center px-6">Logo Pending</span>
+              <img src="/logo.jpg" alt="F.M Morata Logo" className="w-full h-full object-cover rounded-full" />
             </div>
           </div>
         </div>
