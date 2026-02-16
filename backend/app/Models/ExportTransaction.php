@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -9,13 +10,16 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class ExportTransaction extends Model
 {
+    use HasFactory;
+    /**
+     * NOTE: 'assigned_user_id' and 'status' are intentionally excluded.
+     * They are server-managed and set explicitly in controllers.
+     */
     protected $fillable = [
         'shipper_id',
         'bl_no',
         'vessel',
         'destination_country_id',
-        'assigned_user_id',
-        'status',
         'notes',
     ];
 

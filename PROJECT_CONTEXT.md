@@ -24,7 +24,7 @@
 | React Router DOM | ^7.13.0 | Client-side routing |
 | Axios | ^1.13.4 | HTTP client |
 | Vite | — | Build tool / Dev server |
-| Tailwind CSS | v4.1.18 | Styling (via `@tailwindcss/vite` plugin) |
+| Tailwind CSS | v4 | Styling (via `@tailwindcss/vite` plugin) |
 | TypeScript | — | Type safety |
 
 ### Development Environment
@@ -32,7 +32,7 @@
 - **Backend URL**: `http://localhost:8000`
 - **Frontend URL**: `http://localhost:3000`
 - **Database**: MySQL on `127.0.0.1:3306`, database name `morata_fms`
-- **Branch**: `testing` (main branch kept clean)
+- **Default Admin**: `admin@morata.com` / `password`
 
 ---
 
@@ -54,10 +54,7 @@
 - ✅ `withCredentials: true` in Axios
 - ✅ `withXSRFToken: true` in Axios
 - ✅ No tokens stored in localStorage
-
-### Default Admin Account
-- **Email**: `admin@morata.com`
-- **Password**: `password`
+- ✅ Rate limiting on login (5 attempts) and API routes (`throttle:60,1`)
 
 ---
 
@@ -89,10 +86,10 @@ Reference table with 14 pre-seeded countries.
 - `id`, `name`, `email`, `phone`, `address`, `tin` (Tax ID), `timestamps`
 
 #### `import_transactions`
-- `id`, `reference_number` (unique), `client_id`, `country_id` (origin)
-- `description`, `vessel_name`, `eta`, `ata`
-- `total_value`, `currency`, `status` (pending/in_progress/completed/cancelled)
-- `created_by` (user), `notes`, `timestamps`
+- `id`, `customs_ref_no` (unique), `bl_no`, `selective_color`
+- `importer_id` (FK → clients), `arrival_date`
+- `assigned_user_id` (FK → users, server-managed), `status` (server-managed: pending/in_progress/completed/cancelled)
+- `notes`, `timestamps`
 
 #### `import_stages` (6-stage pipeline)
 Each stage has: `{stage}_status`, `{stage}_completed_at`, `{stage}_completed_by`
@@ -107,10 +104,10 @@ Each stage has: `{stage}_status`, `{stage}_completed_at`, `{stage}_completed_by`
 | `billing` | Billing |
 
 #### `export_transactions`
-- `id`, `reference_number` (unique), `client_id`, `country_id` (destination)
-- `description`, `vessel_name`, `etd`, `atd`
-- `total_value`, `currency`, `status`
-- `created_by` (user), `notes`, `timestamps`
+- `id`, `shipper_id` (FK → clients), `bl_no`, `vessel`
+- `destination_country_id` (FK → countries)
+- `assigned_user_id` (FK → users, server-managed), `status` (server-managed)
+- `notes`, `timestamps`
 
 #### `export_stages` (4-stage pipeline)
 Each stage has: `{stage}_status`, `{stage}_completed_at`, `{stage}_completed_by`
@@ -123,13 +120,15 @@ Each stage has: `{stage}_status`, `{stage}_completed_at`, `{stage}_completed_by`
 | `bl` | Bill of Lading |
 
 #### `documents` (polymorphic)
-- `id`, `documentable_type`, `documentable_id` (polymorphic to import/export)
+- `id`, `documentable_type`, `documentable_id` (polymorphic to import/export, server-managed)
 - `type` (invoice, packing_list, bl, co, cil, etc.)
 - `original_name`, `file_path`, `mime_type`, `size_bytes`
-- `uploaded_by`, `timestamps`
+- `uploaded_by` (server-managed), `timestamps`
 
 #### `users`
-- Default Laravel users table + `role` column (admin/user)
+- Default Laravel users table + `role` column
+- Roles: `encoder`, `broker`, `supervisor`, `manager`, `admin`
+- `role` is **NOT** in `$fillable` — must be set explicitly to prevent privilege escalation
 
 ---
 
@@ -137,12 +136,12 @@ Each stage has: `{stage}_status`, `{stage}_completed_at`, `{stage}_completed_by`
 
 | Model | Key Features |
 |---|---|
-| `User` | `role` in fillable, `HasApiTokens` trait |
-| `Country` | `clients`, `importTransactions`, `exportTransactions` relationships |
-| `Client` | `country`, `importTransactions`, `exportTransactions` relationships |
-| `ImportTransaction` | `stages` relationship, `progress` computed attribute |
+| `User` | Role helpers (`isAdmin()`, `hasRoleAtLeast()`), `ROLE_HIERARCHY` constant |
+| `Country` | `importTransactions`, `exportTransactions` relationships |
+| `Client` | Scopes: `active()`, `importers()`, `exporters()` |
+| `ImportTransaction` | `stages`, `importer`, `assignedUser` relationships, `progress` computed |
 | `ImportStage` | `markStageComplete(stage, userId)` helper |
-| `ExportTransaction` | `stages` relationship, `progress` computed attribute |
+| `ExportTransaction` | `stages`, `shipper`, `assignedUser`, `destinationCountry` relationships |
 | `ExportStage` | `markStageComplete(stage, userId)` helper |
 | `Document` | Polymorphic, `formattedSize` accessor, `getTypeLabels()` |
 
@@ -153,22 +152,28 @@ Each stage has: `{stage}_status`, `{stage}_completed_at`, `{stage}_completed_by`
 ### Authentication (`/api/auth/...`)
 | Method | Endpoint | Description |
 |---|---|---|
-| POST | `/api/auth/register` | Register new user |
 | POST | `/api/auth/login` | Login (returns user data) |
 | POST | `/api/auth/logout` | Logout (invalidates session) |
+| POST | `/api/auth/register` | Register new user |
 | POST | `/api/auth/forgot-password` | Send password reset email |
 | POST | `/api/auth/reset-password` | Reset password |
 
-### Protected (`auth:sanctum`)
+### Protected (`auth:sanctum` + `throttle:60,1`)
 | Method | Endpoint | Description |
 |---|---|---|
 | GET | `/api/user` | Get authenticated user |
+| GET | `/api/import-transactions` | List import transactions |
+| POST | `/api/import-transactions` | Create import transaction |
+| GET | `/api/export-transactions` | List export transactions |
+| POST | `/api/export-transactions` | Create export transaction |
+| GET | `/api/clients` | List clients |
 
-### Public
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/api/hello` | Health check |
-| GET | `/api/users` | List all users |
+### Authorization (Policies)
+| Resource | viewAny | create | update | delete |
+|---|---|---|---|---|
+| ImportTransaction | All users | All users | Creator or Supervisor+ | Manager+ |
+| ExportTransaction | All users | All users | Creator or Supervisor+ | Manager+ |
+| Client | All users | Supervisor+ | Supervisor+ | Admin only |
 
 ---
 
@@ -177,77 +182,88 @@ Each stage has: `{stage}_status`, `{stage}_completed_at`, `{stage}_completed_by`
 ### Structure
 ```
 frontend/src/
-├── App.tsx                          # Root component with routes
-├── main.tsx                         # Entry point (BrowserRouter)
-├── index.css                        # Tailwind v4 + custom animations
+├── App.tsx                              # Root component with routes
+├── main.tsx                             # Entry point (BrowserRouter)
+├── index.css                            # Tailwind v4 + custom animations
 ├── lib/
-│   └── axios.ts                     # Axios instance (baseURL, CSRF config)
+│   └── axios.ts                         # Axios instance (baseURL, CSRF, withCredentials)
+├── context/
+│   └── ThemeContext.tsx                  # Dark/light mode toggle
+├── components/                          # Shared components
+│   ├── ConfirmationModal.tsx            # Reusable confirmation dialog
+│   ├── Icon.tsx                         # SVG icon component
+│   ├── Logo.tsx                         # App logo
+│   ├── Pagination.tsx                   # Pagination controls
+│   └── layout/
+│       ├── ErrorLayout.tsx              # Error boundary layout
+│       └── NotFoundPage.tsx             # 404 page
+├── hooks/
+│   └── useConfirmationModal.ts          # Confirmation modal hook
 ├── features/
 │   ├── auth/
-│   │   ├── api/authApi.ts           # Login, logout, CSRF API calls
+│   │   ├── api/authApi.ts               # login(), logout(), getCsrfCookie()
 │   │   ├── components/
-│   │   │   ├── LoginPage.tsx        # Login page layout (glassmorphic)
-│   │   │   └── LoginForm.tsx        # Login form with validation
-│   │   ├── context/AuthContext.tsx   # AuthProvider + AuthContext
-│   │   ├── hooks/useAuth.ts         # useAuth custom hook
-│   │   ├── types/auth.types.ts      # User, AuthState, AuthResponse types
-│   │   └── index.ts                 # Barrel exports
-│   └── dashboard/
+│   │   │   ├── AuthPage.tsx             # Auth page layout
+│   │   │   ├── LoginForm.tsx            # Login form with validation
+│   │   │   ├── SignupForm.tsx           # Registration form
+│   │   │   ├── GuestRoute.tsx           # Redirect if authenticated
+│   │   │   └── ProtectedRoute.tsx       # Redirect if not authenticated
+│   │   ├── context/AuthContext.tsx       # AuthProvider + useAuth
+│   │   ├── hooks/useAuth.ts             # Auth hook
+│   │   ├── types/auth.types.ts          # User, AuthState types
+│   │   └── index.ts                     # Barrel exports
+│   └── tracking/
+│       ├── api/trackingApi.ts           # Transaction API calls
 │       ├── components/
-│       │   ├── Dashboard.tsx         # Main dashboard page
-│       │   ├── DashboardHeader.tsx   # Header with user info
-│       │   ├── DashboardLayout.tsx   # Layout wrapper
-│       │   ├── DashboardStats.tsx    # Statistics section
-│       │   ├── StatCard.tsx          # Individual stat card
-│       │   ├── TransactionSection.tsx
-│       │   └── TransactionSections.tsx
-│       ├── types/dashboard.types.ts
-│       └── index.ts                 # Barrel exports
+│       │   ├── MainLayout.tsx           # App shell (sidebar + content)
+│       │   ├── TrackingDashboard.tsx     # Dashboard with stats
+│       │   ├── ImportList.tsx            # Import transactions list
+│       │   ├── ExportList.tsx            # Export transactions list
+│       │   ├── TrackingDetails.tsx       # Transaction detail view
+│       │   ├── Documents.tsx            # Document management
+│       │   ├── EncodeModal.tsx          # Create/edit transaction modal
+│       │   ├── CalendarCard.tsx         # Calendar widget
+│       │   ├── StatusChart.tsx          # Status chart widget
+│       │   └── Profile.tsx             # User profile page
+│       ├── types.ts                     # Transaction types
+│       └── index.ts                     # Barrel exports
 ```
 
-### Routes
-| Path | Component | Description |
-|---|---|---|
-| `/` | Redirect → `/login` | Root redirect |
-| `/login` | `LoginPage` | Authentication page |
-| `/dashboard` | `Dashboard` | Main dashboard (placeholder) |
-
 ### Design System
-- **Dark theme** with F.M. Morata branding
-- **Glassmorphic** card design on login page
+- **Dark theme** with F.M. Morata branding (dark mode support via ThemeContext)
+- **Glassmorphic** card design on auth pages
 - **Inter** font family (Google Fonts)
 - Custom animations: gradient-shift, floating-orb, fade-in, shimmer
 
 ---
 
-## What's Been Built ✅
+## What's Built ✅
 
 - [x] Laravel 12 backend with Breeze API scaffolding
 - [x] MySQL database schema (8 custom migrations)
 - [x] 8 Eloquent models with relationships and helpers
-- [x] Country seeder (14 countries)
-- [x] Admin user seeder
+- [x] Country seeder (14 countries) + Admin user seeder
 - [x] Cookie-based SPA authentication with CSRF protection
-- [x] Login/Logout API endpoints
+- [x] Login/Logout/Register endpoints
 - [x] React 19 frontend with Vite + Tailwind v4
-- [x] Login page with glassmorphic design
-- [x] Auth context/provider with useAuth hook
-- [x] Placeholder dashboard with component structure
-- [x] Axios configured with CSRF support
+- [x] Auth pages (Login + Signup) with glassmorphic design
+- [x] Auth context/provider with protected + guest route guards
+- [x] Tracking dashboard with stats
+- [x] Import/Export transaction list views
+- [x] Transaction detail view with stage tracking
+- [x] Encode modal for create/edit transactions
+- [x] Document management UI
+- [x] Dark mode support (ThemeContext)
+- [x] API Security Hardening (Policies, mass assignment protection, rate limiting)
+- [x] Security tests for mass assignment protection
 
 ## What's Not Built Yet ❌
 
-- [ ] API endpoints (CRUD) for import/export transactions
-- [ ] API endpoints for clients management
-- [ ] API endpoints for documents (upload/download)
-- [ ] API endpoints for countries
-- [ ] Dashboard populated with real data
-- [ ] Transaction creation/edit forms
-- [ ] Transaction detail view with stage tracking
-- [ ] Document upload/management UI
-- [ ] Client management UI
-- [ ] Role-based access control (admin vs user)
-- [ ] Protected route guards (redirect to login if not authenticated)
+- [ ] Full CRUD API for transactions (show, update, delete endpoints)
+- [ ] CRUD API for clients (store, update, delete)
+- [ ] Document upload API (store, download, delete)
+- [ ] Role-based UI (show/hide actions based on user role)
 - [ ] Search and filtering
-- [ ] Pagination
+- [ ] Pagination (component exists, needs wiring)
 - [ ] Error handling / toast notifications
+- [ ] User management (admin panel)

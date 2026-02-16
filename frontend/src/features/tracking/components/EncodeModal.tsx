@@ -1,53 +1,100 @@
 import React, { useEffect, useState } from 'react';
 import { Icon } from '../../../components/Icon';
-import type { EncodeFormData } from '../types';
+import { trackingApi } from '../api/trackingApi';
+import type { ApiClient, CreateExportPayload, CreateImportPayload } from '../types';
 
 interface EncodeModalProps {
     isOpen: boolean;
     onClose: () => void;
     type: 'import' | 'export';
-    onSave: (data: EncodeFormData) => void;
+    onSave: (data: CreateImportPayload | CreateExportPayload) => void;
 }
 
-const INITIAL_FORM: EncodeFormData = {
-    ref: '',
-    bl: '',
-    party: '',
-    status: '',
-    blsc: '',
-    extra: '',
-};
-
 export const EncodeModal: React.FC<EncodeModalProps> = ({ isOpen, onClose, type, onSave }) => {
-    const [formData, setFormData] = useState<EncodeFormData>({ ...INITIAL_FORM });
-
     const isImport = type === 'import';
 
-    // Reset form when modal opens
+    // Form state
+    const [ref, setRef] = useState('');
+    const [bl, setBl] = useState('');
+    const [blsc, setBlsc] = useState('');
+    const [clientId, setClientId] = useState<number | ''>('');
+    const [arrivalDate, setArrivalDate] = useState('');
+    const [vessel, setVessel] = useState('');
+
+    // Client dropdown data
+    const [clients, setClients] = useState<ApiClient[]>([]);
+    const [loadingClients, setLoadingClients] = useState(false);
+
+    // Submission state
+    const [submitting, setSubmitting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    // Fetch clients when modal opens
     useEffect(() => {
         if (isOpen) {
-            setFormData({ ...INITIAL_FORM });
+            // Reset form
+            setRef('');
+            setBl('');
+            setBlsc('');
+            setClientId('');
+            setArrivalDate('');
+            setVessel('');
+            setError(null);
+
+            // Load clients for dropdown
+            setLoadingClients(true);
+            trackingApi
+                .getClients(isImport ? 'importer' : 'exporter')
+                .then(setClients)
+                .catch(() => setClients([]))
+                .finally(() => setLoadingClients(false));
         }
-    }, [isOpen]);
+    }, [isOpen, isImport]);
 
     if (!isOpen) return null;
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
-    };
-
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        onSave(formData);
-        onClose();
+        if (clientId === '') return;
+
+        setSubmitting(true);
+        setError(null);
+
+        try {
+            if (isImport) {
+                const payload: CreateImportPayload = {
+                    customs_ref_no: ref,
+                    bl_no: bl,
+                    selective_color: blsc as 'green' | 'yellow' | 'red',
+                    importer_id: clientId,
+                    arrival_date: arrivalDate,
+                };
+                await onSave(payload);
+            } else {
+                const payload: CreateExportPayload = {
+                    shipper_id: clientId,
+                    bl_no: bl,
+                    vessel: vessel,
+                };
+                await onSave(payload);
+            }
+            onClose();
+        } catch (err: unknown) {
+            const msg =
+                err instanceof Error
+                    ? err.message
+                    : 'Failed to save transaction. Please try again.';
+            setError(msg);
+        } finally {
+            setSubmitting(false);
+        }
     };
 
-    const statusOptions = isImport
-        ? ['Cleared', 'Pending', 'Delayed', 'In Transit']
-        : ['Shipped', 'Processing', 'Delayed', 'In Transit'];
-
-    const blscOptions = ['Green', 'Yellow', 'Orange', 'Red', 'Blue'];
+    const blscOptions = [
+        { value: 'green', label: 'Green' },
+        { value: 'yellow', label: 'Yellow' },
+        { value: 'red', label: 'Red' },
+    ];
 
     const inputClass =
         'w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-bold text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 outline-none transition-all placeholder:text-gray-300 dark:placeholder:text-gray-600';
@@ -84,6 +131,13 @@ export const EncodeModal: React.FC<EncodeModalProps> = ({ isOpen, onClose, type,
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-8 space-y-6">
+                    {/* Error Banner */}
+                    {error && (
+                        <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-sm text-red-600 dark:text-red-400 font-medium">
+                            {error}
+                        </div>
+                    )}
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Import Only: BLSC (Selective Color) */}
                         {isImport && (
@@ -92,14 +146,13 @@ export const EncodeModal: React.FC<EncodeModalProps> = ({ isOpen, onClose, type,
                                 <div className="relative">
                                     <select
                                         required
-                                        name="blsc"
-                                        value={formData.blsc}
+                                        value={blsc}
                                         className={selectClass}
-                                        onChange={handleInputChange}
+                                        onChange={(e) => setBlsc(e.target.value)}
                                     >
                                         <option value="">Select Color</option>
                                         {blscOptions.map(opt => (
-                                            <option key={opt} value={opt}>{opt}</option>
+                                            <option key={opt.value} value={opt.value}>{opt.label}</option>
                                         ))}
                                     </select>
                                     <Icon name="chevron-down" className="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
@@ -108,88 +161,56 @@ export const EncodeModal: React.FC<EncodeModalProps> = ({ isOpen, onClose, type,
                         )}
 
                         {/* Ref ID / Ref No */}
-                        <div className="space-y-2">
-                            <label className={labelClass}>
-                                {isImport ? 'Customs Ref No.' : 'Ref ID'}
-                            </label>
-                            <input
-                                required
-                                name="ref"
-                                type="text"
-                                value={formData.ref}
-                                placeholder={isImport ? 'e.g. REF-2024-001' : 'e.g. REF-EXP-001'}
-                                className={inputClass}
-                                onChange={handleInputChange}
-                            />
-                        </div>
-
-                        {/* Export Only: Shipper */}
-                        {!isImport && (
+                        {isImport && (
                             <div className="space-y-2">
-                                <label className={labelClass}>Shipper</label>
+                                <label className={labelClass}>Customs Ref No.</label>
                                 <input
                                     required
-                                    name="party"
                                     type="text"
-                                    value={formData.party}
-                                    placeholder="Enter Shipper Name"
+                                    value={ref}
+                                    placeholder="e.g. REF-2024-001"
                                     className={inputClass}
-                                    onChange={handleInputChange}
+                                    onChange={(e) => setRef(e.target.value)}
                                 />
                             </div>
                         )}
+
+                        {/* Client Dropdown */}
+                        <div className="space-y-2">
+                            <label className={labelClass}>
+                                {isImport ? 'Importer' : 'Shipper'}
+                            </label>
+                            <div className="relative">
+                                <select
+                                    required
+                                    value={clientId}
+                                    className={selectClass}
+                                    onChange={(e) => setClientId(e.target.value ? Number(e.target.value) : '')}
+                                    disabled={loadingClients}
+                                >
+                                    <option value="">
+                                        {loadingClients ? 'Loading...' : `Select ${isImport ? 'Importer' : 'Shipper'}`}
+                                    </option>
+                                    {clients.map(client => (
+                                        <option key={client.id} value={client.id}>{client.name}</option>
+                                    ))}
+                                </select>
+                                <Icon name="chevron-down" className="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                            </div>
+                        </div>
 
                         {/* Bill of Lading */}
                         <div className="space-y-2">
                             <label className={labelClass}>Bill of Lading</label>
                             <input
                                 required
-                                name="bl"
                                 type="text"
-                                value={formData.bl}
+                                value={bl}
                                 placeholder="e.g. BL-78542136"
                                 className={inputClass}
-                                onChange={handleInputChange}
+                                onChange={(e) => setBl(e.target.value)}
                             />
                         </div>
-
-                        {/* Import Only: Status */}
-                        {isImport && (
-                            <div className="space-y-2">
-                                <label className={labelClass}>Status</label>
-                                <div className="relative">
-                                    <select
-                                        required
-                                        name="status"
-                                        value={formData.status}
-                                        className={selectClass}
-                                        onChange={handleInputChange}
-                                    >
-                                        <option value="">Select Status</option>
-                                        {statusOptions.map(opt => (
-                                            <option key={opt} value={opt}>{opt}</option>
-                                        ))}
-                                    </select>
-                                    <Icon name="chevron-down" className="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Import Only: Importer */}
-                        {isImport && (
-                            <div className="space-y-2">
-                                <label className={labelClass}>Importer</label>
-                                <input
-                                    required
-                                    name="party"
-                                    type="text"
-                                    value={formData.party}
-                                    placeholder="Enter Importer Name"
-                                    className={inputClass}
-                                    onChange={handleInputChange}
-                                />
-                            </div>
-                        )}
 
                         {/* Export Only: Vessel */}
                         {!isImport && (
@@ -197,12 +218,11 @@ export const EncodeModal: React.FC<EncodeModalProps> = ({ isOpen, onClose, type,
                                 <label className={labelClass}>Vessel</label>
                                 <input
                                     required
-                                    name="extra"
                                     type="text"
-                                    value={formData.extra}
+                                    value={vessel}
                                     placeholder="Enter Vessel Name"
                                     className={inputClass}
-                                    onChange={handleInputChange}
+                                    onChange={(e) => setVessel(e.target.value)}
                                 />
                             </div>
                         )}
@@ -213,11 +233,10 @@ export const EncodeModal: React.FC<EncodeModalProps> = ({ isOpen, onClose, type,
                                 <label className={labelClass}>Arrival Date</label>
                                 <input
                                     required
-                                    name="extra"
                                     type="date"
-                                    value={formData.extra}
+                                    value={arrivalDate}
                                     className={inputClass}
-                                    onChange={handleInputChange}
+                                    onChange={(e) => setArrivalDate(e.target.value)}
                                 />
                             </div>
                         )}
@@ -227,16 +246,27 @@ export const EncodeModal: React.FC<EncodeModalProps> = ({ isOpen, onClose, type,
                         <button
                             type="button"
                             onClick={onClose}
-                            className="flex-1 px-6 py-4 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-2xl text-sm font-bold hover:bg-gray-200 dark:hover:bg-gray-700 transition-all active:scale-95"
+                            disabled={submitting}
+                            className="flex-1 px-6 py-4 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-2xl text-sm font-bold hover:bg-gray-200 dark:hover:bg-gray-700 transition-all active:scale-95 disabled:opacity-50"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
-                            className="flex-1 px-6 py-4 bg-blue-600 text-white rounded-2xl text-sm font-bold hover:bg-blue-700 transition-all shadow-xl active:scale-95 flex items-center justify-center gap-2"
+                            disabled={submitting}
+                            className="flex-1 px-6 py-4 bg-blue-600 text-white rounded-2xl text-sm font-bold hover:bg-blue-700 transition-all shadow-xl active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            <Icon name="check-circle" className="w-4 h-4" />
-                            Encode
+                            {submitting ? (
+                                <>
+                                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white" />
+                                    Saving...
+                                </>
+                            ) : (
+                                <>
+                                    <Icon name="check-circle" className="w-4 h-4" />
+                                    Encode
+                                </>
+                            )}
                         </button>
                     </div>
                 </form>

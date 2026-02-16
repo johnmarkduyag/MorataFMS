@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { Icon } from '../../../components/Icon';
-import { mockTrackingApi } from '../api/mockTrackingApi';
+import { trackingApi } from '../api/trackingApi';
 import type { ExportTransaction, ImportTransaction, LayoutContext } from '../types';
 import { DateTimeCard } from './shared/DateTimeCard';
 import { PageHeader } from './shared/PageHeader';
@@ -18,9 +18,27 @@ export const TrackingDashboard = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const data = await mockTrackingApi.getAllTransactions();
-                // Sort by date (assuming strings, but would verify format in real app)
-                setTransactions(data);
+                const [importsRes, exportsRes] = await Promise.all([
+                    trackingApi.getImports(),
+                    trackingApi.getExports(),
+                ]);
+                const imports: ImportTransaction[] = importsRes.data.map(t => ({
+                    ref: t.customs_ref_no,
+                    bl: t.bl_no,
+                    status: t.status === 'pending' ? 'Pending' : t.status === 'in_progress' ? 'In Transit' : t.status === 'completed' ? 'Cleared' : 'Delayed',
+                    color: t.selective_color === 'green' ? 'bg-green-500' : t.selective_color === 'yellow' ? 'bg-yellow-500' : 'bg-red-500',
+                    importer: t.importer?.name || 'Unknown',
+                    date: t.arrival_date || '',
+                }));
+                const exports: ExportTransaction[] = exportsRes.data.map(t => ({
+                    ref: `EXP-${String(t.id).padStart(4, '0')}`,
+                    bl: t.bl_no,
+                    status: t.status === 'pending' ? 'Processing' : t.status === 'in_progress' ? 'In Transit' : t.status === 'completed' ? 'Shipped' : 'Delayed',
+                    color: '',
+                    shipper: t.shipper?.name || 'Unknown',
+                    vessel: t.vessel || '',
+                }));
+                setTransactions([...imports, ...exports]);
             } catch (err) {
                 console.error("Failed to load transactions", err);
             } finally {

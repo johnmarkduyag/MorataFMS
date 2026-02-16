@@ -8,15 +8,17 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Document extends Model
 {
+    /**
+     * NOTE: 'documentable_type', 'documentable_id', and 'uploaded_by' are
+     * intentionally excluded — they must be set by controller logic to prevent
+     * polymorphic type injection and ownership spoofing.
+     */
     protected $fillable = [
-        'documentable_type',
-        'documentable_id',
         'type',
         'filename',
         'path',
         'size_bytes',
         'version',
-        'uploaded_by',
     ];
 
     protected $casts = [

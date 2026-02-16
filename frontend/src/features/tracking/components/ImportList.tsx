@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { ConfirmationModal } from '../../../components/ConfirmationModal';
 import { useConfirmationModal } from '../../../hooks/useConfirmationModal';
-import { mockTrackingApi } from '../api/mockTrackingApi';
-import type { ImportTransaction, LayoutContext } from '../types';
+import { trackingApi } from '../api/trackingApi';
+import type { CreateImportPayload, ImportTransaction, LayoutContext } from '../types';
 import { CalendarCard } from './CalendarCard';
 import { EncodeModal } from './EncodeModal';
 import { StatusChart } from './StatusChart';
@@ -27,8 +27,17 @@ export const ImportList = () => {
     useEffect(() => {
         const loadData = async () => {
             try {
-                const result = await mockTrackingApi.getAllImports();
-                setData(result);
+                const response = await trackingApi.getImports();
+                // Map API response to list row format
+                const mapped: ImportTransaction[] = response.data.map(t => ({
+                    ref: t.customs_ref_no,
+                    bl: t.bl_no,
+                    status: t.status === 'pending' ? 'Pending' : t.status === 'in_progress' ? 'In Transit' : t.status === 'completed' ? 'Cleared' : 'Delayed',
+                    color: t.selective_color === 'green' ? 'bg-green-500' : t.selective_color === 'yellow' ? 'bg-yellow-500' : 'bg-red-500',
+                    importer: t.importer?.name || 'Unknown',
+                    date: t.arrival_date || '',
+                }));
+                setData(mapped);
             } catch (err) {
                 console.error("Failed to load imports", err);
             } finally {
@@ -321,9 +330,19 @@ export const ImportList = () => {
                 isOpen={isEncodeModalOpen}
                 onClose={() => setIsEncodeModalOpen(false)}
                 type="import"
-                onSave={(data) => {
-                    console.log('Encoded Import:', data);
-                    // TODO: Send data to backend API
+                onSave={async (data) => {
+                    await trackingApi.createImport(data as CreateImportPayload);
+                    // Refresh list after creation
+                    const response = await trackingApi.getImports();
+                    const mapped: ImportTransaction[] = response.data.map(t => ({
+                        ref: t.customs_ref_no,
+                        bl: t.bl_no,
+                        status: t.status === 'pending' ? 'Pending' : t.status === 'in_progress' ? 'In Transit' : t.status === 'completed' ? 'Cleared' : 'Delayed',
+                        color: t.selective_color === 'green' ? 'bg-green-500' : t.selective_color === 'yellow' ? 'bg-yellow-500' : 'bg-red-500',
+                        importer: t.importer?.name || 'Unknown',
+                        date: t.arrival_date || '',
+                    }));
+                    setData(mapped);
                 }}
             />
         </div>

@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { ConfirmationModal } from '../../../components/ConfirmationModal';
 import { useConfirmationModal } from '../../../hooks/useConfirmationModal';
-import { mockTrackingApi } from '../api/mockTrackingApi';
-import type { ExportTransaction, LayoutContext } from '../types';
+import { trackingApi } from '../api/trackingApi';
+import type { CreateExportPayload, ExportTransaction, LayoutContext } from '../types';
 import { CalendarCard } from './CalendarCard';
 import { EncodeModal } from './EncodeModal';
 import { StatusChart } from './StatusChart';
@@ -29,8 +29,17 @@ export const ExportList = () => {
     useEffect(() => {
         const loadData = async () => {
             try {
-                const result = await mockTrackingApi.getAllExports();
-                setData(result);
+                const response = await trackingApi.getExports();
+                // Map API response to list row format
+                const mapped: ExportTransaction[] = response.data.map(t => ({
+                    ref: `EXP-${String(t.id).padStart(4, '0')}`,
+                    bl: t.bl_no,
+                    status: t.status === 'pending' ? 'Processing' : t.status === 'in_progress' ? 'In Transit' : t.status === 'completed' ? 'Shipped' : 'Delayed',
+                    color: '',
+                    shipper: t.shipper?.name || 'Unknown',
+                    vessel: t.vessel || '',
+                }));
+                setData(mapped);
             } catch (err) {
                 console.error("Failed to load exports", err);
             } finally {
@@ -258,9 +267,19 @@ export const ExportList = () => {
                 isOpen={isEncodeModalOpen}
                 onClose={() => setIsEncodeModalOpen(false)}
                 type="export"
-                onSave={(data) => {
-                    console.log('Encoded Export:', data);
-                    // TODO: Send data to backend API
+                onSave={async (data) => {
+                    await trackingApi.createExport(data as CreateExportPayload);
+                    // Refresh list after creation
+                    const response = await trackingApi.getExports();
+                    const mapped: ExportTransaction[] = response.data.map(t => ({
+                        ref: `EXP-${String(t.id).padStart(4, '0')}`,
+                        bl: t.bl_no,
+                        status: t.status === 'pending' ? 'Processing' : t.status === 'in_progress' ? 'In Transit' : t.status === 'completed' ? 'Shipped' : 'Delayed',
+                        color: '',
+                        shipper: t.shipper?.name || 'Unknown',
+                        vessel: t.vessel || '',
+                    }));
+                    setData(mapped);
                 }}
             />
         </div>
