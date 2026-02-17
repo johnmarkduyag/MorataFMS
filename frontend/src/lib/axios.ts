@@ -10,4 +10,22 @@ const api = axios.create({
     withXSRFToken: true
 });
 
+// Global 401 interceptor: redirect to login on session expiry
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response?.status === 401) {
+            // Don't redirect if already on auth routes (prevents loops)
+            const url = error.config?.url || '';
+            const isAuthRoute = url.includes('/auth/') || url.includes('/sanctum/');
+
+            if (!isAuthRoute) {
+                localStorage.removeItem('user');
+                window.location.href = '/login';
+            }
+        }
+        return Promise.reject(error);
+    }
+);
+
 export default api;

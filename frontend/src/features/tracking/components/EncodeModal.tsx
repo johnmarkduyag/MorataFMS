@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Icon } from '../../../components/Icon';
-import { trackingApi } from '../api/trackingApi';
-import type { ApiClient, CreateExportPayload, CreateImportPayload } from '../types';
+import { useClients } from '../hooks/useClients';
+import { useCountries } from '../hooks/useCountries';
+import type { CreateExportPayload, CreateImportPayload } from '../types';
 
 interface EncodeModalProps {
     isOpen: boolean;
@@ -20,18 +21,25 @@ export const EncodeModal: React.FC<EncodeModalProps> = ({ isOpen, onClose, type,
     const [clientId, setClientId] = useState<number | ''>('');
     const [arrivalDate, setArrivalDate] = useState('');
     const [vessel, setVessel] = useState('');
+    const [destinationCountryId, setDestinationCountryId] = useState<number | ''>('');
 
-    // Client dropdown data
-    const [clients, setClients] = useState<ApiClient[]>([]);
-    const [loadingClients, setLoadingClients] = useState(false);
+    // TanStack Query hooks for dropdown data
+    const { data: clients = [], isLoading: loadingClients } = useClients(isImport ? 'importer' : 'exporter');
+    const { data: countries = [], isLoading: loadingCountries } = useCountries('export_destination', !isImport);
 
     // Submission state
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // Fetch clients when modal opens
+    // Scroll lock and form reset when modal opens
     useEffect(() => {
         if (isOpen) {
+            // Lock background scroll (scrollbar-gutter in MainLayout handles the shift)
+            const mainElement = document.getElementById('main-content');
+            if (mainElement) {
+                mainElement.style.overflow = 'hidden';
+            }
+
             // Reset form
             setRef('');
             setBl('');
@@ -39,19 +47,24 @@ export const EncodeModal: React.FC<EncodeModalProps> = ({ isOpen, onClose, type,
             setClientId('');
             setArrivalDate('');
             setVessel('');
+            setDestinationCountryId('');
             setError(null);
-
-            // Load clients for dropdown
-            setLoadingClients(true);
-            trackingApi
-                .getClients(isImport ? 'importer' : 'exporter')
-                .then(setClients)
-                .catch(() => setClients([]))
-                .finally(() => setLoadingClients(false));
         }
-    }, [isOpen, isImport]);
+
+        return () => {
+            const mainElement = document.getElementById('main-content');
+            if (mainElement) {
+                mainElement.style.overflow = '';
+            }
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+        };
+    }, [isOpen]);
 
     if (!isOpen) return null;
+
+    // Today's date for min attribute
+    const today = new Date().toISOString().split('T')[0];
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -75,6 +88,7 @@ export const EncodeModal: React.FC<EncodeModalProps> = ({ isOpen, onClose, type,
                     shipper_id: clientId,
                     bl_no: bl,
                     vessel: vessel,
+                    ...(destinationCountryId !== '' && { destination_country_id: destinationCountryId }),
                 };
                 await onSave(payload);
             }
@@ -105,8 +119,14 @@ export const EncodeModal: React.FC<EncodeModalProps> = ({ isOpen, onClose, type,
     const selectClass = `${inputClass} appearance-none cursor-pointer`;
 
     return (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[150] p-4">
-            <div className="bg-surface rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200 border border-border transition-all">
+        <div
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[150] p-4 overflow-hidden"
+            onClick={onClose}
+        >
+            <div
+                className="bg-surface rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200 border border-border transition-all"
+                onClick={(e) => e.stopPropagation()}
+            >
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-border">
                     <div className="flex items-center gap-4">
@@ -227,6 +247,30 @@ export const EncodeModal: React.FC<EncodeModalProps> = ({ isOpen, onClose, type,
                             </div>
                         )}
 
+                        {/* Export Only: Port of Destination */}
+                        {!isImport && (
+                            <div className="space-y-2 md:col-span-2">
+                                <label className={labelClass}>Port of Destination</label>
+                                <div className="relative">
+                                    <select
+                                        required
+                                        value={destinationCountryId}
+                                        className={selectClass}
+                                        onChange={(e) => setDestinationCountryId(e.target.value ? Number(e.target.value) : '')}
+                                        disabled={loadingCountries}
+                                    >
+                                        <option value="">
+                                            {loadingCountries ? 'Loading...' : 'Select Destination Country'}
+                                        </option>
+                                        {countries.map(country => (
+                                            <option key={country.id} value={country.id}>{country.name}</option>
+                                        ))}
+                                    </select>
+                                    <Icon name="chevron-down" className="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                                </div>
+                            </div>
+                        )}
+
                         {/* Import Only: Arrival Date */}
                         {isImport && (
                             <div className="space-y-2 md:col-span-2">
@@ -235,6 +279,7 @@ export const EncodeModal: React.FC<EncodeModalProps> = ({ isOpen, onClose, type,
                                     required
                                     type="date"
                                     value={arrivalDate}
+                                    min={today}
                                     className={inputClass}
                                     onChange={(e) => setArrivalDate(e.target.value)}
                                 />

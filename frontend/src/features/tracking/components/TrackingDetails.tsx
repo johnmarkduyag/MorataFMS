@@ -42,6 +42,8 @@ export const TrackingDetails = () => {
                                 color: '',
                                 shipper: t.shipper?.name || 'Unknown',
                                 vessel: t.vessel || '',
+                                departureDate: t.created_at ? new Date(t.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '',
+                                portOfDestination: t.destination_country?.name || '',
                             });
                         }
                     }
@@ -79,15 +81,9 @@ export const TrackingDetails = () => {
         );
     }
 
-    // specific logic to determine stages based on status (Mock Logic)
     const isImport = transaction.ref.startsWith('IMP');
     
     const getStageStatus = (index: number) => {
-        // Simple mock logic: 
-        // Cleared = All done
-        // In Transit = 3 done
-        // Pending = 1 done
-        // Delayed = 2 done (but red?)
         if (transaction.status === 'Cleared') return 'Completed';
         if (transaction.status === 'In Transit' && index < 3) return 'Completed';
         if (transaction.status === 'In Transit' && index === 3) return 'In Progress';
@@ -107,11 +103,11 @@ export const TrackingDetails = () => {
     ];
 
     const exportStages = [
-        { title: 'Booking Confirmation', icon: 'file-text' },
-        { title: 'Container Pick-up', icon: 'truck' },
-        { title: 'Gate In', icon: 'check-circle' },
-        { title: 'Customs Clearance', icon: 'file-text' },
-        { title: 'Loaded on Vessel', icon: 'truck' } // need ship icon?
+        { title: 'BOC Document Processing', icon: 'file-text' },
+        { title: 'Bill of Lading Generation', icon: 'file-text' },
+        { title: 'CO Application and Releasing', icon: 'check-circle' },
+        { title: 'DCCCI Printing', icon: 'file-text' },
+        { title: 'Billing of Liquidation', icon: 'file-text' },
     ];
 
     const stages = isImport ? importStages : exportStages;

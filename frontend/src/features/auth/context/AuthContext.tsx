@@ -22,23 +22,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isLoading: true,
   });
 
-  // Initialize auth state from localStorage
+  // Verify session with backend on page load
   useEffect(() => {
     const userStr = localStorage.getItem('user');
 
     if (userStr) {
-      try {
-        const user = JSON.parse(userStr);
-        setAuthState({
-          user,
-          isAuthenticated: true,
-          isLoading: false,
+      // Verify the session is still valid by hitting the backend
+      authApi.getCurrentUser()
+        .then((response) => {
+          // Session is valid — use fresh user data from backend
+          // Handle both wrapped { data: User } and direct User response
+          const raw = response as unknown as Record<string, unknown>;
+          const userData = (raw.data ? raw.data : raw) as User;
+          localStorage.setItem('user', JSON.stringify(userData));
+          setAuthState({
+            user: userData,
+            isAuthenticated: true,
+            isLoading: false,
+          });
+        })
+        .catch(() => {
+          // Session expired — clear stale localStorage
+          // The 401 interceptor in axios.ts will handle the redirect
+          localStorage.removeItem('user');
+          setAuthState({
+            user: null,
+            isAuthenticated: false,
+            isLoading: false,
+          });
         });
-      } catch (error) {
-        console.error('Failed to parse user from localStorage:', error);
-        localStorage.removeItem('user');
-        setAuthState(prev => ({ ...prev, isLoading: false }));
-      }
     } else {
       setAuthState(prev => ({ ...prev, isLoading: false }));
     }

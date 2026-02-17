@@ -176,7 +176,11 @@ export const MainLayout = () => {
             </aside>
 
             {/* Main Content Area */}
-            <main className="flex-1 overflow-y-auto relative m-2 rounded-2xl shadow-2xl transition-all duration-300 ease-in-out bg-surface-elevated p-6">
+            <main
+                id="main-content"
+                className="flex-1 overflow-y-auto relative m-2 rounded-2xl shadow-2xl transition-colors duration-300 ease-in-out bg-surface-elevated p-6"
+                style={{ scrollbarGutter: 'stable' }}
+            >
                 {/* Page Content */}
                 <Outlet context={{ user, dateTime }} />
             </main>

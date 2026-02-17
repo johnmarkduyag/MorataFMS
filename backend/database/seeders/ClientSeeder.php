@@ -9,7 +9,7 @@ class ClientSeeder extends Seeder
 {
     public function run(): void
     {
-        $importers = [
+        $clients = [
             'DOLE PHILIPPINES INC.',
             'ECO-EDGE HOME INTERIORS & SUPPLIES',
             'ECO STEEL ROLLFORMING INDUSTRY INC.',
@@ -23,11 +23,11 @@ class ClientSeeder extends Seeder
             'ZJM TRADING CORP.',
         ];
 
-        foreach ($importers as $name) {
-            Client::firstOrCreate(
+        foreach ($clients as $name) {
+            Client::updateOrCreate(
                 ['name' => $name],
                 [
-                    'type' => 'importer',
+                    'type' => 'both',
                     'is_active' => true,
                 ]
             );

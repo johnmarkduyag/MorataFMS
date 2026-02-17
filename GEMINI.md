@@ -16,7 +16,7 @@
 *   **Framework:** React 19 (Vite)
 *   **Language:** TypeScript
 *   **Styling:** Tailwind CSS v4 (via `@tailwindcss/vite`)
-*   **State/Networking:** Axios, React Context (Auth).
+*   **State/Networking:** Axios, React Context (Auth), TanStack Query v5 (server state/caching).
 *   **Routing:** React Router DOM v7.
 
 ## 3. Architecture & Conventions
@@ -40,7 +40,7 @@
 *   **Authentication:** The frontend uses **cookie-based authentication**. It must first request `/sanctum/csrf-cookie` before attempting login.
 *   **API Pattern:** RESTful API with `apiResource` routes.
 *   **Styling:** Utility-first CSS using Tailwind with dark mode support.
-*   **Frontend State:** Context API for global state (Auth), local state for component data.
+*   **Frontend State:** Context API for global state (Auth), TanStack Query for server state (data fetching/caching).
 
 ## 4. Setup and Execution
 
@@ -199,3 +199,45 @@ export const getItems = async () => {
     return data;
 };
 ```
+
+## 12. Data Fetching & Caching Patterns
+
+> **IMPORTANT:** All data fetching MUST use TanStack Query hooks. Do NOT use `useEffect` + `useState` for API calls.
+
+### Frontend (TanStack Query v5)
+*   `QueryClientProvider` is set up in `src/main.tsx` with `staleTime: 5min`, `retry: 1`.
+*   **Custom hooks** live in `src/features/{feature}/hooks/` (e.g., `useImports.ts`, `useClients.ts`).
+*   **Queries** (`useQuery`) — for reading data. Use descriptive query keys: `['imports', params]`.
+*   **Mutations** (`useMutation`) — for creating/updating. Always `invalidateQueries` on success.
+*   **Static data** (clients, countries) — use `staleTime: Infinity` (fetched once per session).
+*   **Dynamic data** (transactions) — use default `staleTime: 5min`.
+
+### Hook Pattern Example
+```typescript
+// Query hook (src/features/tracking/hooks/useImports.ts)
+import { useQuery } from '@tanstack/react-query';
+import { trackingApi } from '../api/trackingApi';
+
+export const useImports = (params?: Params) => {
+    return useQuery({
+        queryKey: ['imports', params],
+        queryFn: () => trackingApi.getImports(params),
+    });
+};
+
+// Mutation hook (src/features/tracking/hooks/useCreateImport.ts)
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+
+export const useCreateImport = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: trackingApi.createImport,
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['imports'] }),
+    });
+};
+```
+
+### Backend (Rate Limiting)
+*   All authenticated routes use `throttle:60,1` (60 requests/minute per user).
+*   Login has its own rate limiter (5 attempts).
+*   For static endpoints (e.g., `/api/countries`), consider using Laravel's `Cache::remember()` to avoid repeated DB queries.

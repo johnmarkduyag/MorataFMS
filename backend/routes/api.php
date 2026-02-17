@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\CountryController;
 use App\Http\Controllers\ExportTransactionController;
 use App\Http\Controllers\ImportTransactionController;
 use App\Http\Controllers\UserController;
@@ -18,9 +19,14 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
         return new UserResource($request->user());
     });
 
-    Route::apiResource('import-transactions', ImportTransactionController::class)->only(['index', 'store']);
-    Route::apiResource('export-transactions', ExportTransactionController::class)->only(['index', 'store']);
+    Route::get('import-transactions/stats', [ImportTransactionController::class, 'stats']);
+    Route::get('export-transactions/stats', [ExportTransactionController::class, 'stats']);
+    Route::patch('import-transactions/{import_transaction}/cancel', [ImportTransactionController::class, 'cancel']);
+    Route::patch('export-transactions/{export_transaction}/cancel', [ExportTransactionController::class, 'cancel']);
+    Route::apiResource('import-transactions', ImportTransactionController::class)->only(['index', 'store', 'destroy']);
+    Route::apiResource('export-transactions', ExportTransactionController::class)->only(['index', 'store', 'destroy']);
     Route::get('/clients', [ClientController::class, 'index']);
+    Route::get('/countries', [CountryController::class, 'index']);
 
     // Admin-only: User management
     Route::apiResource('users', UserController::class);

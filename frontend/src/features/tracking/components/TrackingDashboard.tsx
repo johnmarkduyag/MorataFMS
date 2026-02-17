@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { Icon } from '../../../components/Icon';
-import { trackingApi } from '../api/trackingApi';
+import { useExports } from '../hooks/useExports';
+import { useImports } from '../hooks/useImports';
 import type { ExportTransaction, ImportTransaction, LayoutContext } from '../types';
 import { DateTimeCard } from './shared/DateTimeCard';
 import { PageHeader } from './shared/PageHeader';
@@ -11,42 +12,37 @@ type Transaction = ImportTransaction | ExportTransaction;
 export const TrackingDashboard = () => {
     const navigate = useNavigate();
     const { user, dateTime } = useOutletContext<LayoutContext>();
-    const [transactions, setTransactions] = useState<Transaction[]>([]);
-    const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('');
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const [importsRes, exportsRes] = await Promise.all([
-                    trackingApi.getImports(),
-                    trackingApi.getExports(),
-                ]);
-                const imports: ImportTransaction[] = importsRes.data.map(t => ({
-                    ref: t.customs_ref_no,
-                    bl: t.bl_no,
-                    status: t.status === 'pending' ? 'Pending' : t.status === 'in_progress' ? 'In Transit' : t.status === 'completed' ? 'Cleared' : 'Delayed',
-                    color: t.selective_color === 'green' ? 'bg-green-500' : t.selective_color === 'yellow' ? 'bg-yellow-500' : 'bg-red-500',
-                    importer: t.importer?.name || 'Unknown',
-                    date: t.arrival_date || '',
-                }));
-                const exports: ExportTransaction[] = exportsRes.data.map(t => ({
-                    ref: `EXP-${String(t.id).padStart(4, '0')}`,
-                    bl: t.bl_no,
-                    status: t.status === 'pending' ? 'Processing' : t.status === 'in_progress' ? 'In Transit' : t.status === 'completed' ? 'Shipped' : 'Delayed',
-                    color: '',
-                    shipper: t.shipper?.name || 'Unknown',
-                    vessel: t.vessel || '',
-                }));
-                setTransactions([...imports, ...exports]);
-            } catch (err) {
-                console.error("Failed to load transactions", err);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchData();
-    }, []);
+    // Use hooks for data fetching
+    const { data: importsData, isLoading: importsLoading } = useImports();
+    const { data: exportsData, isLoading: exportsLoading } = useExports();
+
+    const transactions = useMemo<Transaction[]>(() => {
+        const imports: ImportTransaction[] = (importsData?.data || []).map(t => ({
+            ref: t.customs_ref_no,
+            bl: t.bl_no,
+            status: t.status === 'pending' ? 'Pending' : t.status === 'in_progress' ? 'In Transit' : t.status === 'completed' ? 'Cleared' : 'Delayed',
+            color: t.selective_color === 'green' ? 'bg-green-500' : t.selective_color === 'yellow' ? 'bg-yellow-500' : 'bg-red-500',
+            importer: t.importer?.name || 'Unknown',
+            date: t.arrival_date || '',
+        }));
+
+        const exports: ExportTransaction[] = (exportsData?.data || []).map(t => ({
+            ref: `EXP-${String(t.id).padStart(4, '0')}`,
+            bl: t.bl_no,
+            status: t.status === 'pending' ? 'Processing' : t.status === 'in_progress' ? 'In Transit' : t.status === 'completed' ? 'Shipped' : 'Delayed',
+            color: '',
+            shipper: t.shipper?.name || 'Unknown',
+            vessel: t.vessel || '',
+            departureDate: t.created_at ? new Date(t.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '',
+            portOfDestination: t.destination_country?.name || '',
+        }));
+
+        return [...imports, ...exports];
+    }, [importsData, exportsData]);
+
+    const loading = importsLoading || exportsLoading;
 
     const filteredData = transactions.filter(t => 
         t.ref.toLowerCase().includes(filter.toLowerCase()) ||

@@ -19,6 +19,8 @@ class ExportTransactionFactory extends Factory
             'shipper_id' => Client::factory(),
             'bl_no' => 'BL-' . fake()->unique()->numerify('########'),
             'vessel' => 'MV ' . fake()->lastName() . ' ' . fake()->randomElement(['Star', 'Express', 'Voyager', 'Spirit']),
+            'destination_country_id' => null,
+            'assigned_user_id' => null,
             'status' => fake()->randomElement(['pending', 'in_progress', 'completed']),
             'notes' => fake()->optional()->sentence(),
         ];

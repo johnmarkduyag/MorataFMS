@@ -40,7 +40,11 @@ class ImportTransactionController extends Controller
             $query->where('selective_color', $color);
         }
 
-        $transactions = $query->orderBy('created_at', 'desc')->paginate(15);
+        $perPage = $request->input('per_page', 15);
+        if ($perPage > 100)
+            $perPage = 100; // Cap at 100
+
+        $transactions = $query->orderBy('created_at', 'desc')->paginate($perPage);
 
         return ImportTransactionResource::collection($transactions);
     }
@@ -63,5 +67,65 @@ class ImportTransactionController extends Controller
         return (new ImportTransactionResource($transaction))
             ->response()
             ->setStatusCode(201);
+    }
+
+    /**
+     * GET /api/import-transactions/stats
+     * Returns total status counts across all records.
+     */
+    public function stats()
+    {
+        $this->authorize('viewAny', ImportTransaction::class);
+
+        $counts = ImportTransaction::selectRaw("
+            COUNT(*) as total,
+            SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending,
+            SUM(CASE WHEN status = 'in_progress' THEN 1 ELSE 0 END) as in_progress,
+            SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed,
+            SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END) as cancelled
+        ")->first();
+
+        return response()->json(['data' => $counts]);
+    }
+
+    /**
+     * PATCH /api/import-transactions/{import_transaction}/cancel
+     * Cancel an import transaction with a reason.
+     */
+    public function cancel(Request $request, ImportTransaction $import_transaction)
+    {
+        $this->authorize('update', $import_transaction);
+
+        // Only pending or in_progress can be cancelled
+        if (!in_array($import_transaction->status, ['pending', 'in_progress'])) {
+            return response()->json([
+                'message' => 'Only pending or in-progress transactions can be cancelled.',
+            ], 422);
+        }
+
+        $request->validate([
+            'reason' => 'required|string|max:500',
+        ]);
+
+        $import_transaction->status = 'cancelled';
+        $import_transaction->notes = $request->input('reason');
+        $import_transaction->save();
+
+        $import_transaction->load(['importer', 'stages', 'assignedUser']);
+
+        return new ImportTransactionResource($import_transaction);
+    }
+
+    /**
+     * DELETE /api/import-transactions/{import_transaction}
+     * Delete an import transaction.
+     */
+    public function destroy(ImportTransaction $import_transaction)
+    {
+        $this->authorize('delete', $import_transaction);
+
+        $import_transaction->delete();
+
+        return response()->noContent();
     }
 }

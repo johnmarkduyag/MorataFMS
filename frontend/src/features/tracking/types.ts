@@ -4,6 +4,7 @@ export interface LayoutContext {
 }
 
 export interface ImportTransaction {
+    id: number;
     ref: string;
     bl: string;
     status: string;
@@ -13,12 +14,23 @@ export interface ImportTransaction {
 }
 
 export interface ExportTransaction {
+    id: number;
     ref: string;
     bl: string;
     status: string;
     color: string;
     shipper: string;
     vessel: string;
+    departureDate: string;
+    portOfDestination: string;
+}
+
+export interface TransactionStats {
+    total: number;
+    pending: number;
+    in_progress: number;
+    completed: number;
+    cancelled: number;
 }
 
 export interface FileData {
@@ -86,6 +98,12 @@ export interface ApiClient {
     id: number;
     name: string;
     type: 'importer' | 'exporter' | 'both';
+}
+
+export interface ApiCountry {
+    id: number;
+    name: string;
+    code: string;
 }
 
 export interface PaginatedResponse<T> {

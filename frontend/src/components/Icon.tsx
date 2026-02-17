@@ -23,7 +23,9 @@ export type IconName =
     | 'filter'
     | 'truck'
     | 'credit-card'
-    | 'alert-circle';
+    | 'alert-circle'
+    | 'more-vertical'
+    | 'ban';
 
 interface IconProps extends SVGProps<SVGSVGElement> {
     name: IconName;
@@ -52,7 +54,9 @@ const ICONS: Record<IconName, ReactElement> = {
     'file-text': <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />,
     'download': <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />,
     'plus': <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />,
-    'x': <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+    'x': <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />,
+    'more-vertical': <><circle cx="12" cy="5" r="1" fill="currentColor" /><circle cx="12" cy="12" r="1" fill="currentColor" /><circle cx="12" cy="19" r="1" fill="currentColor" /></>,
+    'ban': <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />,
 };
 
 export const Icon: React.FC<IconProps> = ({ name, className = "w-5 h-5", ...props }) => {

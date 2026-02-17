@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useOutletContext } from 'react-router-dom';
-import { ConfirmationModal } from '../../../components/ConfirmationModal';
-import { useConfirmationModal } from '../../../hooks/useConfirmationModal';
-import { trackingApi } from '../api/trackingApi';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useOutletContext, useSearchParams } from 'react-router-dom';
+import { useCancelExport } from '../hooks/useCancelExport';
+import { useCreateExport } from '../hooks/useCreateExport';
+import { useExports } from '../hooks/useExports';
+import { useExportStats } from '../hooks/useExportStats';
 import type { CreateExportPayload, ExportTransaction, LayoutContext } from '../types';
 import { CalendarCard } from './CalendarCard';
+import { CancelTransactionModal } from './CancelTransactionModal';
 import { EncodeModal } from './EncodeModal';
 import { StatusChart } from './StatusChart';
 
@@ -14,63 +16,83 @@ import { PageHeader } from './shared/PageHeader';
 
 export const ExportList = () => {
     const navigate = useNavigate();
-    const { openModal, modalProps } = useConfirmationModal();
     const [isEncodeModalOpen, setIsEncodeModalOpen] = useState(false);
+    const createExport = useCreateExport();
+    const cancelExport = useCancelExport();
+    const [cancelTarget, setCancelTarget] = useState<{ id: number; ref: string } | null>(null);
 
     const { user, dateTime } = useOutletContext<LayoutContext>();
 
-    const [data, setData] = useState<ExportTransaction[]>([]);
-    const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
+    const [searchParams, setSearchParams] = useSearchParams();
+    const page = parseInt(searchParams.get('page') || '1');
+    const perPage = parseInt(searchParams.get('per_page') || '10');
+    
+    const setPage = (newPage: number) => {
+        setSearchParams((prev: URLSearchParams) => {
+            prev.set('page', String(newPage));
+            return prev;
+        });
+    };
+
+    const setPerPage = (newPerPage: number) => {
+        setSearchParams((prev: URLSearchParams) => {
+            prev.set('per_page', String(newPerPage));
+            prev.set('page', '1'); // Reset to first page
+            return prev;
+        });
+    };
     const [openDropdown, setOpenDropdown] = useState(false);
 
+    // Debounce search
     useEffect(() => {
-        const loadData = async () => {
-            try {
-                const response = await trackingApi.getExports();
-                const mapped: ExportTransaction[] = response.data.map(t => ({
-                    ref: `EXP-${String(t.id).padStart(4, '0')}`,
-                    bl: t.bl_no,
-                    status: t.status === 'pending' ? 'Processing' : t.status === 'in_progress' ? 'In Transit' : t.status === 'completed' ? 'Shipped' : 'Delayed',
-                    color: '',
-                    shipper: t.shipper?.name || 'Unknown',
-                    vessel: t.vessel || '',
-                }));
-                setData(mapped);
-            } catch (err) {
-                console.error("Failed to load exports", err);
-            } finally {
-                setLoading(false);
+        const timer = setTimeout(() => {
+            setDebouncedSearch(searchQuery);
+            if (searchQuery !== '') {
+                setPage(1);
             }
-        };
-        loadData();
-    }, []);
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
 
-    const statusCounts = data.reduce((acc, item) => {
-        acc[item.status] = (acc[item.status] || 0) + 1;
-        return acc;
-    }, {} as Record<string, number>);
-
-    const chartData = [
-        { label: 'Shipped', value: statusCounts['Shipped'] || 0, color: '#4cd964' },
-        { label: 'Processing', value: statusCounts['Processing'] || 0, color: '#ffcc00' },
-        { label: 'Delayed', value: statusCounts['Delayed'] || 0, color: '#ff2d55' },
-        { label: 'In Transit', value: statusCounts['In Transit'] || 0, color: '#00d2ff' },
-    ];
-
-    const filteredData = data.filter(item => {
-        const query = searchQuery.toLowerCase();
-        const matchesSearch = item.ref.toLowerCase().includes(query) ||
-                              item.bl.toLowerCase().includes(query) ||
-                              item.shipper.toLowerCase().includes(query);
-        
-        const matchesFilter = statusFilter ? item.status === statusFilter : true;
-
-        return matchesSearch && matchesFilter;
+    const { data: response, isLoading, isFetching } = useExports({
+        search: debouncedSearch,
+        status: statusFilter,
+        page,
+        per_page: perPage,
     });
 
-    if (loading) {
+    const data = useMemo<ExportTransaction[]>(() => {
+        if (!response?.data) return [];
+        return response.data.map(t => ({
+            id: t.id,
+            ref: `EXP-${String(t.id).padStart(4, '0')}`,
+            bl: t.bl_no,
+            status: t.status === 'pending' ? 'Processing' : t.status === 'in_progress' ? 'In Transit' : t.status === 'completed' ? 'Shipped' : 'Delayed',
+            color: '',
+            shipper: t.shipper?.name || 'Unknown',
+            vessel: t.vessel || '',
+            departureDate: t.created_at ? new Date(t.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '',
+            portOfDestination: t.destination_country?.name || '',
+        }));
+    }, [response]);
+
+    // Use stats API for accurate total counts (not just current page)
+    const { data: stats } = useExportStats();
+
+    const chartData = [
+        { label: 'Shipped', value: stats?.completed || 0, color: '#4cd964' },
+        { label: 'Processing', value: stats?.pending || 0, color: '#ffcc00' },
+        { label: 'Delayed', value: stats?.cancelled || 0, color: '#ff2d55' },
+        { label: 'In Transit', value: stats?.in_progress || 0, color: '#00d2ff' },
+    ];
+
+    // Server-side filtering is now handled by the API
+    const filteredData = data;
+
+    if (isLoading) {
         return (
             <div className="flex items-center justify-center h-96">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -181,15 +203,16 @@ export const ExportList = () => {
             </div>
 
             {/* Transaction List Card */}
-            <div className="bg-surface rounded-[2rem] border border-border shadow-sm transition-all duration-300 ease-in-out overflow-hidden">
+            <div className={`bg-surface rounded-[2rem] border border-border shadow-sm transition-all duration-300 ease-in-out overflow-hidden ${isFetching ? 'opacity-60' : 'opacity-100'}`}>
                 <div className="p-6">
                     {/* Table Header */}
                     <div className="grid gap-4 pb-3 border-b border-border mb-3 px-2 font-bold"
-                        style={{ gridTemplateColumns: '1fr 2fr 1.5fr 1.5fr 80px' }}>
-                        <span className="text-xs font-bold text-text-secondary uppercase tracking-wider">Ref ID</span>
+                        style={{ gridTemplateColumns: '1.4fr 1.4fr 1.5fr 1.4fr 1.5fr 100px' }}>
                         <span className="text-xs font-bold text-text-secondary uppercase tracking-wider">Shipper</span>
                         <span className="text-xs font-bold text-text-secondary uppercase tracking-wider">Bill of Lading</span>
                         <span className="text-xs font-bold text-text-secondary uppercase tracking-wider">Vessel</span>
+                        <span className="text-xs font-bold text-text-secondary uppercase tracking-wider">Departure Date</span>
+                        <span className="text-xs font-bold text-text-secondary uppercase tracking-wider">Port of Destination</span>
                         <span className="text-xs font-bold text-text-secondary uppercase tracking-wider text-right">Actions</span>
                     </div>
 
@@ -200,47 +223,44 @@ export const ExportList = () => {
                                 key={i}
                                 onClick={() => navigate(`/tracking/${row.ref}`)}
                                 className="grid gap-4 py-2 items-center cursor-pointer rounded-xl transition-all duration-200 px-2 hover:bg-hover hover:shadow-sm"
-                                style={{ gridTemplateColumns: '1fr 2fr 1.5fr 1.5fr 80px' }}
+                                style={{ gridTemplateColumns: '1.4fr 1.4fr 1.5fr 1.4fr 1.5fr 100px' }}
                             >
-                                <p className="text-sm font-bold text-text-primary">{row.ref}</p>
                                 <p className="text-sm text-text-secondary font-bold">{row.shipper}</p>
                                 <p className="text-sm text-text-secondary font-bold">{row.bl}</p>
                                 <p className="text-sm text-text-secondary font-bold">{row.vessel}</p>
-                                <div className="flex justify-end gap-2 px-1">
+                                <p className="text-sm font-bold text-text-primary">{row.departureDate}</p>
+                                <p className="text-sm text-text-secondary font-bold">{row.portOfDestination}</p>
+                                <div className="flex justify-end gap-1.5">
+                                    {/* Edit button — always visible */}
                                     <button
-                                        className="p-1.5 text-blue-600 hover:bg-blue-50 rounded"
+                                        className="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-md transition-colors"
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            openModal({
-                                                title: 'Edit Export',
-                                                message: 'Are you sure you want to edit this export transaction?',
-                                                confirmText: 'Confirm Edit',
-                                                confirmButtonClass: 'bg-blue-600 hover:bg-blue-700',
-                                                onConfirm: () => {
-                                                    navigate(`/tracking/${row.ref}`);
-                                                }
-                                            });
+                                            navigate(`/tracking/${row.ref}`);
                                         }}
+                                        title="Edit"
                                     >
                                         <Icon name="edit" className="w-4 h-4" />
                                     </button>
+                                    {/* Cancel button — always visible, disabled for non-cancellable */}
                                     <button
+                                        className={`p-1.5 rounded-md transition-colors ${
+                                            row.status === 'Processing' || row.status === 'In Transit'
+                                                ? 'text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/30 cursor-pointer'
+                                                : 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
+                                        }`}
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            openModal({
-                                                title: 'Delete Export',
-                                                message: 'Are you sure you want to delete this export transaction? This action cannot be undone.',
-                                                confirmText: 'Delete',
-                                                confirmButtonClass: 'bg-red-600 hover:bg-red-700',
-                                                onConfirm: () => {
-                                                    console.log('Deleted', row.ref);
-                                                }
-                                            });
+                                            if (row.status === 'Processing' || row.status === 'In Transit') {
+                                                setCancelTarget({ id: row.id, ref: row.ref });
+                                            }
                                         }}
-                                        className="p-1.5 text-red-600 hover:bg-red-50 rounded"
-                                        title="Delete"
+                                        disabled={row.status !== 'Processing' && row.status !== 'In Transit'}
+                                        title={row.status === 'Processing' || row.status === 'In Transit'
+                                            ? 'Cancel Transaction'
+                                            : 'Cannot cancel — transaction is ' + row.status.toLowerCase()}
                                     >
-                                        <Icon name="trash" className="w-4 h-4" />
+                                        <Icon name="x" className="w-4 h-4" />
                                     </button>
                                 </div>
                             </div>
@@ -249,33 +269,37 @@ export const ExportList = () => {
 
                     {/* Table Pagination */}
                     <Pagination
-                        currentPage={1}
-                        totalPages={100}
-                        onPageChange={(page) => console.log('Page changed to:', page)}
+                        currentPage={response?.meta?.current_page || 1}
+                        totalPages={response?.meta?.last_page || 1}
+                        perPage={perPage}
+                        onPageChange={setPage}
+                        onPerPageChange={setPerPage}
                     />
                 </div>
             </div>
 
-            <ConfirmationModal
-                {...modalProps}
-            />
 
             <EncodeModal
                 isOpen={isEncodeModalOpen}
                 onClose={() => setIsEncodeModalOpen(false)}
                 type="export"
                 onSave={async (data) => {
-                    await trackingApi.createExport(data as CreateExportPayload);
-                    const response = await trackingApi.getExports();
-                    const mapped: ExportTransaction[] = response.data.map(t => ({
-                        ref: `EXP-${String(t.id).padStart(4, '0')}`,
-                        bl: t.bl_no,
-                        status: t.status === 'pending' ? 'Processing' : t.status === 'in_progress' ? 'In Transit' : t.status === 'completed' ? 'Shipped' : 'Delayed',
-                        color: '',
-                        shipper: t.shipper?.name || 'Unknown',
-                        vessel: t.vessel || '',
-                    }));
-                    setData(mapped);
+                    await createExport.mutateAsync(data as CreateExportPayload);
+                }}
+            />
+
+            <CancelTransactionModal
+                isOpen={!!cancelTarget}
+                onClose={() => setCancelTarget(null)}
+                transactionRef={cancelTarget?.ref || ''}
+                isLoading={cancelExport.isPending}
+                onConfirm={(reason) => {
+                    if (cancelTarget) {
+                        cancelExport.mutate(
+                            { id: cancelTarget.id, reason },
+                            { onSuccess: () => setCancelTarget(null) }
+                        );
+                    }
                 }}
             />
         </div>
