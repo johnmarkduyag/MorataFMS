@@ -4,41 +4,46 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class AuditLog extends Model
 {
+    const UPDATED_AT = null; // Only created_at, no updated_at
+
     protected $fillable = [
+        'auditable_type',
+        'auditable_id',
         'user_id',
-        'action',
-        'subject_type',
-        'subject_id',
-        'description',
+        'event',
+        'old_values',
+        'new_values',
         'ip_address',
     ];
+
+    protected $casts = [
+        'old_values' => 'array',
+        'new_values' => 'array',
+    ];
+
+    // Relationships
+    public function auditable(): MorphTo
+    {
+        return $this->morphTo();
+    }
 
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * Convenience method to write a log entry.
-     */
-    public static function record(
-        string $action,
-        string $description,
-        ?int $userId = null,
-        ?string $subjectType = null,
-        ?int $subjectId = null,
-        ?string $ipAddress = null
-    ): self {
-        return self::create([
-            'user_id' => $userId,
-            'action' => $action,
-            'subject_type' => $subjectType,
-            'subject_id' => $subjectId,
-            'description' => $description,
-            'ip_address' => $ipAddress,
-        ]);
+    // Helper to get human-readable model name
+    public function getModelNameAttribute(): string
+    {
+        return str($this->auditable_type)
+            ->afterLast('\\')
+            ->snake()
+            ->replace('_', ' ')
+            ->title()
+            ->value();
     }
 }

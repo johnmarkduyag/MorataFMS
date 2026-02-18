@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useTheme } from '../../../context/ThemeContext';
+import { Icon } from '../../../components/Icon';
 
 interface UploadModalProps {
     isOpen: boolean;
@@ -9,8 +9,8 @@ interface UploadModalProps {
 }
 
 export const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onUpload, title }) => {
-    const { theme } = useTheme();
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [isDragging, setIsDragging] = useState(false);
 
     if (!isOpen) return null;
 
@@ -23,72 +23,116 @@ export const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onUpl
     const handleUploadClick = () => {
         if (selectedFile) {
             onUpload(selectedFile);
-            setSelectedFile(null); // Reset after upload
+            setSelectedFile(null);
         }
+    };
+
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(true);
+    };
+
+    const handleDragLeave = () => {
+        setIsDragging(false);
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(false);
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+            setSelectedFile(e.dataTransfer.files[0]);
+        }
+    };
+
+    const formatFileSize = (bytes: number) => {
+        if (bytes < 1024) return `${bytes} B`;
+        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+        return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
     };
 
     return (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[150] p-4">
-            <div className={`rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200 transition-colors ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'
-                }`}>
+            <div className="bg-surface rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200 border border-border">
                 {/* Header */}
-                <div className={`flex items-center justify-between p-6 border-b transition-colors ${theme === 'dark' ? 'border-gray-700' : 'border-gray-100'
-                    }`}>
-                    <h3 className={`text-xl font-bold transition-colors ${theme === 'dark' ? 'text-white' : 'text-gray-900'
-                        }`}>Upload Document</h3>
+                <div className="flex items-center justify-between p-6 border-b border-border">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
+                            <Icon name="file-text" className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-bold text-text-primary">Upload Document</h3>
+                            <p className="text-xs text-text-muted">For: {title}</p>
+                        </div>
+                    </div>
                     <button
                         onClick={onClose}
-                        className={`p-2 rounded-xl transition-all ${theme === 'dark'
-                            ? 'text-gray-400 hover:text-white hover:bg-gray-700'
-                            : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
-                            }`}
+                        className="p-2 rounded-xl text-text-muted hover:text-text-primary hover:bg-hover transition-all"
                     >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
+                        <Icon name="x" className="w-5 h-5" />
                     </button>
                 </div>
 
-                <div className="p-8 space-y-6">
-                    <p className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                        Upload document for <span className="font-bold">{title}</span>
-                    </p>
-
-                    <div className={`border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center text-center transition-colors ${theme === 'dark'
-                        ? 'border-gray-600 bg-gray-700/50 hover:bg-gray-700'
-                        : 'border-gray-200 bg-gray-50 hover:bg-gray-100'
-                        }`}>
+                <div className="p-6 space-y-5">
+                    {/* Drop Zone */}
+                    <div
+                        onDragOver={handleDragOver}
+                        onDragLeave={handleDragLeave}
+                        onDrop={handleDrop}
+                        className={`border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center text-center transition-all cursor-pointer ${
+                            isDragging
+                                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                                : 'border-border-strong bg-surface-secondary hover:bg-hover hover:border-blue-400'
+                        }`}
+                        onClick={() => document.getElementById('stage-file-upload')?.click()}
+                    >
                         <input
                             type="file"
-                            id="file-upload"
+                            id="stage-file-upload"
                             className="hidden"
                             onChange={handleFileChange}
                         />
-                        <label
-                            htmlFor="file-upload"
-                            className="cursor-pointer flex flex-col items-center gap-2"
-                        >
-                            <svg className={`w-10 h-10 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                            </svg>
-                            <span className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-                                {selectedFile ? selectedFile.name : 'Click to select a file'}
-                            </span>
-                        </label>
+                        <svg className="w-10 h-10 text-text-muted mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                        <span className="text-sm font-medium text-text-secondary">
+                            {isDragging ? 'Drop file here' : 'Click or drag & drop a file'}
+                        </span>
+                        <span className="text-xs text-text-muted mt-1">PDF, DOCX, JPG, PNG up to 10 MB</span>
                     </div>
 
+                    {/* Selected File Display */}
+                    {selectedFile && (
+                        <div className="flex items-center gap-3 p-3 bg-surface-secondary border border-border rounded-xl">
+                            <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 shrink-0">
+                                <Icon name="file-text" className="w-5 h-5" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-sm font-bold text-text-primary truncate">{selectedFile.name}</p>
+                                <p className="text-xs text-text-muted">{formatFileSize(selectedFile.size)}</p>
+                            </div>
+                            <button
+                                onClick={(e) => { e.stopPropagation(); setSelectedFile(null); }}
+                                className="p-1 text-text-muted hover:text-red-500 transition-colors"
+                            >
+                                <Icon name="x" className="w-4 h-4" />
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Upload Button */}
                     <button
                         onClick={handleUploadClick}
                         disabled={!selectedFile}
-                        className={`w-full py-4 rounded-xl text-sm font-bold transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2 ${!selectedFile
-                            ? (theme === 'dark' ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-gray-100 text-gray-400 cursor-not-allowed')
-                            : (theme === 'dark' ? 'bg-white text-black hover:bg-gray-100' : 'bg-black text-white hover:bg-gray-900')
-                            }`}
+                        className={`w-full py-3 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 ${
+                            !selectedFile
+                                ? 'bg-surface-secondary text-text-muted cursor-not-allowed border border-border'
+                                : 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg active:scale-[0.98]'
+                        }`}
                     >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                         </svg>
-                        Upload
+                        Upload Document
                     </button>
                 </div>
             </div>

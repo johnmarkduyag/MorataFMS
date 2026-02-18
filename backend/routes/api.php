@@ -1,5 +1,14 @@
 <?php
 
+use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\ClientController;
+use App\Http\Controllers\CountryController;
+use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\ExportTransactionController;
+use App\Http\Controllers\ImportTransactionController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\UserController;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -9,62 +18,40 @@ Route::prefix('auth')->group(function () {
     require __DIR__ . '/auth.php';
 });
 
-Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
-    return $request->user();
-});
+Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
+    Route::get('/user', function (Request $request) {
+        return new UserResource($request->user());
+    });
 
-Route::get('/hello', function () {
-    return response()->json([
-        'message' => 'Hello, World!',
-        'status' => 'success',
-        'my_name' => 'Sean'
-    ]);
-});
+    Route::get('import-transactions/stats', [ImportTransactionController::class, 'stats']);
+    Route::get('export-transactions/stats', [ExportTransactionController::class, 'stats']);
+    Route::patch('import-transactions/{import_transaction}/cancel', [ImportTransactionController::class, 'cancel']);
+    Route::patch('export-transactions/{export_transaction}/cancel', [ExportTransactionController::class, 'cancel']);
+    Route::apiResource('import-transactions', ImportTransactionController::class)->only(['index', 'store', 'destroy']);
+    Route::apiResource('export-transactions', ExportTransactionController::class)->only(['index', 'store', 'destroy']);
+    Route::get('/clients', [ClientController::class, 'index']);
+    Route::get('/countries', [CountryController::class, 'index']);
 
+    // Admin-only: User management
+    Route::apiResource('users', UserController::class);
 
-Route::get('/users', function () {
-    return UserResource::collection(User::all());
-});
+    // Document management
+    Route::apiResource('documents', DocumentController::class)->except(['update']);
+    Route::get('documents/{document}/download', [DocumentController::class, 'download']);
 
-// Admin-only user management routes
-Route::middleware(['auth:sanctum', 'admin'])->prefix('users')->group(function () {
-    Route::get('/', [\App\Http\Controllers\UserController::class, 'index']);
-    Route::post('/', [\App\Http\Controllers\UserController::class, 'store']);
-    Route::get('/{id}', [\App\Http\Controllers\UserController::class, 'show']);
-    Route::put('/{id}', [\App\Http\Controllers\UserController::class, 'update']);
-    Route::post('/{id}/deactivate', [\App\Http\Controllers\UserController::class, 'deactivate']);
-    Route::post('/{id}/activate', [\App\Http\Controllers\UserController::class, 'activate']);
-});
+    // Audit logs (read-only, supervisor+)
+    Route::get('audit-logs', [AuditLogController::class, 'index']);
 
-// Admin-only client management routes
-Route::middleware(['auth:sanctum', 'admin'])->prefix('clients')->group(function () {
-    Route::get('/', [\App\Http\Controllers\ClientController::class, 'index']);
-    Route::post('/', [\App\Http\Controllers\ClientController::class, 'store']);
-    Route::get('/{id}', [\App\Http\Controllers\ClientController::class, 'show']);
-    Route::put('/{id}', [\App\Http\Controllers\ClientController::class, 'update']);
-    Route::post('/{id}/toggle-active', [\App\Http\Controllers\ClientController::class, 'toggleActive']);
-    Route::get('/{id}/transactions', [\App\Http\Controllers\ClientController::class, 'transactions']);
-});
+    // Admin: Reports & Analytics
+    Route::get('reports/monthly', [ReportController::class, 'monthly']);
+    Route::get('reports/clients', [ReportController::class, 'clients']);
+    Route::get('reports/turnaround', [ReportController::class, 'turnaround']);
 
-// Admin-only transaction oversight routes
-Route::middleware(['auth:sanctum', 'admin'])->prefix('transactions')->group(function () {
-    Route::get('/', [\App\Http\Controllers\TransactionController::class, 'index']);
-    Route::get('/encoders', [\App\Http\Controllers\TransactionController::class, 'encoders']);
-    Route::patch('/imports/{id}/assign', [\App\Http\Controllers\TransactionController::class, 'reassignImport']);
-    Route::patch('/exports/{id}/assign', [\App\Http\Controllers\TransactionController::class, 'reassignExport']);
-    Route::patch('/imports/{id}/status', [\App\Http\Controllers\TransactionController::class, 'overrideImportStatus']);
-    Route::patch('/exports/{id}/status', [\App\Http\Controllers\TransactionController::class, 'overrideExportStatus']);
-});
-
-// Admin-only reports & analytics routes
-Route::middleware(['auth:sanctum', 'admin'])->prefix('reports')->group(function () {
-    Route::get('/monthly', [\App\Http\Controllers\ReportController::class, 'monthly']);
-    Route::get('/clients', [\App\Http\Controllers\ReportController::class, 'clients']);
-    Route::get('/turnaround', [\App\Http\Controllers\ReportController::class, 'turnaround']);
-});
-
-// Admin-only audit log routes
-Route::middleware(['auth:sanctum', 'admin'])->prefix('audit-logs')->group(function () {
-    Route::get('/', [\App\Http\Controllers\AuditLogController::class, 'index']);
-    Route::get('/actions', [\App\Http\Controllers\AuditLogController::class, 'actions']);
+    // Admin: Transaction Oversight
+    Route::get('transactions', [TransactionController::class, 'index']);
+    Route::get('transactions/encoders', [TransactionController::class, 'encoders']);
+    Route::patch('transactions/import/{id}/reassign', [TransactionController::class, 'reassignImport']);
+    Route::patch('transactions/export/{id}/reassign', [TransactionController::class, 'reassignExport']);
+    Route::patch('transactions/import/{id}/status', [TransactionController::class, 'overrideImportStatus']);
+    Route::patch('transactions/export/{id}/status', [TransactionController::class, 'overrideExportStatus']);
 });

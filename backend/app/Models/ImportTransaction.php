@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -9,14 +11,17 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class ImportTransaction extends Model
 {
+    use HasFactory, Auditable;
+    /**
+     * NOTE: 'assigned_user_id' and 'status' are intentionally excluded.
+     * They are server-managed and set explicitly in controllers.
+     */
     protected $fillable = [
         'customs_ref_no',
         'bl_no',
         'selective_color',
         'importer_id',
         'arrival_date',
-        'assigned_user_id',
-        'status',
         'notes',
     ];
 

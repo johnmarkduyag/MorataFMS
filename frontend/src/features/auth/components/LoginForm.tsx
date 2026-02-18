@@ -110,7 +110,7 @@ export const LoginForm = ({ onToggleSignup }: { onToggleSignup: () => void }) =>
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full bg-black text-white py-2.5 rounded-full font-medium hover:bg-gray-900 transition-colors text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full bg-[#1a2332] text-white py-2.5 rounded-full font-medium hover:bg-[#2a3342] transition-colors text-xs disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? "Signing in..." : "Login"}
         </button>

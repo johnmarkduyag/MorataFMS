@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useEffect, useState } from 'react';
 import { authApi } from '../api/authApi';
 import type { AuthState, LoginCredentials, RegisterCredentials, User } from '../types/auth.types';
 
@@ -12,30 +12,45 @@ interface AuthContextType extends AuthState {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
+// Export the context so it can be used in custom hooks
+export { AuthContext };
+
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [authState, setAuthState] = useState<AuthState>({
     user: null,
     isAuthenticated: false,
     isLoading: true,
   });
 
-  // Initialize auth state from localStorage
+  // Verify session with backend on page load
   useEffect(() => {
     const userStr = localStorage.getItem('user');
 
     if (userStr) {
-      try {
-        const user = JSON.parse(userStr);
-        setAuthState({
-          user,
-          isAuthenticated: true,
-          isLoading: false,
+      // Verify the session is still valid by hitting the backend
+      authApi.getCurrentUser()
+        .then((response) => {
+          // Session is valid — use fresh user data from backend
+          // Handle both wrapped { data: User } and direct User response
+          const raw = response as unknown as Record<string, unknown>;
+          const userData = (raw.data ? raw.data : raw) as User;
+          localStorage.setItem('user', JSON.stringify(userData));
+          setAuthState({
+            user: userData,
+            isAuthenticated: true,
+            isLoading: false,
+          });
+        })
+        .catch(() => {
+          // Session expired — clear stale localStorage
+          // The 401 interceptor in axios.ts will handle the redirect
+          localStorage.removeItem('user');
+          setAuthState({
+            user: null,
+            isAuthenticated: false,
+            isLoading: false,
+          });
         });
-      } catch (error) {
-        console.error('Failed to parse user from localStorage:', error);
-        localStorage.removeItem('user');
-        setAuthState(prev => ({ ...prev, isLoading: false }));
-      }
     } else {
       setAuthState(prev => ({ ...prev, isLoading: false }));
     }
@@ -55,24 +70,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
     } catch (error) {
       console.error('Login failed:', error);
-      throw error;
-    }
-  };
-
-  const register = async (credentials: RegisterCredentials) => {
-    try {
-      const response = await authApi.register(credentials);
-
-      // Store user only - authentication is via session cookie
-      localStorage.setItem('user', JSON.stringify(response.user));
-
-      setAuthState({
-        user: response.user,
-        isAuthenticated: true,
-        isLoading: false,
-      });
-    } catch (error) {
-      console.error('Registration failed:', error);
       throw error;
     }
   };
@@ -102,17 +99,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }));
   };
 
+  const register = async (credentials: RegisterCredentials) => {
+    try {
+      const response = await authApi.register(credentials);
+
+      localStorage.setItem('user', JSON.stringify(response.user));
+
+      setAuthState({
+        user: response.user,
+        isAuthenticated: true,
+        isLoading: false,
+      });
+    } catch (error) {
+      console.error('Registration failed:', error);
+      throw error;
+    }
+  };
+
   return (
     <AuthContext.Provider value={{ ...authState, login, register, logout, setUser }}>
       {children}
     </AuthContext.Provider>
   );
-};
+}
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};

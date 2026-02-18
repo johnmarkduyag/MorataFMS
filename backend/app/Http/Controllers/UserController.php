@@ -2,92 +2,97 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * List all users (admin only).
      */
     public function index()
     {
-        $users = User::orderBy('created_at', 'desc')->get();
+        $this->authorize('viewAny', User::class);
+
+        $users = User::orderBy('name')->get();
+
         return UserResource::collection($users);
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Create a new user (admin only).
      */
-    public function store(Request $request)
+    public function store(StoreUserRequest $request)
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8'],
-            'role' => ['required', Rule::in(['encoder', 'broker', 'supervisor', 'manager', 'admin'])],
-        ]);
+        $this->authorize('create', User::class);
 
-        $user = User::create([
+        $validated = $request->validated();
+
+        $user = new User([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
-            'role' => $validated['role'],
-            'is_active' => true,
         ]);
+        $user->role = $validated['role']; // Server-managed: set explicitly
+        $user->save();
+
+        return (new UserResource($user))
+            ->response()
+            ->setStatusCode(201);
+    }
+
+    /**
+     * Show a single user (admin only).
+     */
+    public function show(User $user)
+    {
+        $this->authorize('viewAny', User::class);
 
         return new UserResource($user);
     }
 
     /**
-     * Display the specified resource.
+     * Update a user (admin only, cannot update self).
      */
-    public function show(string $id)
+    public function update(UpdateUserRequest $request, User $user)
     {
-        $user = User::findOrFail($id);
-        return new UserResource($user);
-    }
+        $this->authorize('update', $user);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        $user = User::findOrFail($id);
+        $validated = $request->validated();
 
-        $validated = $request->validate([
-            'name' => ['sometimes', 'string', 'max:255'],
-            'email' => ['sometimes', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
-            'role' => ['sometimes', Rule::in(['encoder', 'broker', 'supervisor', 'manager', 'admin'])],
-        ]);
+        // Update fillable fields
+        if (isset($validated['name'])) {
+            $user->name = $validated['name'];
+        }
+        if (isset($validated['email'])) {
+            $user->email = $validated['email'];
+        }
+        if (isset($validated['password'])) {
+            $user->password = Hash::make($validated['password']);
+        }
 
-        $user->update($validated);
+        // Role is server-managed, set explicitly
+        if (isset($validated['role'])) {
+            $user->role = $validated['role'];
+        }
 
-        return new UserResource($user);
-    }
-
-    /**
-     * Deactivate a user.
-     */
-    public function deactivate(string $id)
-    {
-        $user = User::findOrFail($id);
-        $user->update(['is_active' => false]);
+        $user->save();
 
         return new UserResource($user);
     }
 
     /**
-     * Activate a user.
+     * Delete a user (admin only, cannot delete self).
      */
-    public function activate(string $id)
+    public function destroy(User $user)
     {
-        $user = User::findOrFail($id);
-        $user->update(['is_active' => true]);
+        $this->authorize('delete', $user);
 
-        return new UserResource($user);
+        $user->delete();
+
+        return response()->json(['message' => 'User deleted successfully.'], 200);
     }
 }

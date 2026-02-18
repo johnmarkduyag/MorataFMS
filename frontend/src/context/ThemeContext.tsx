@@ -17,7 +17,9 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     useEffect(() => {
         const root = window.document.documentElement;
+        // Remove all theme classes
         root.classList.remove('light', 'dark', 'mix');
+        // Apply the active theme class — CSS tokens handle the rest
         root.classList.add(theme);
         localStorage.setItem('theme', theme);
     }, [theme]);

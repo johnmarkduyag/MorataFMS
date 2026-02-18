@@ -1,324 +1,317 @@
-import React, { useState } from 'react';
-import { useTheme } from '../../../context/ThemeContext';
+import React, { useEffect, useState } from 'react';
+import { Icon } from '../../../components/Icon';
+import { useClients } from '../hooks/useClients';
+import { useCountries } from '../hooks/useCountries';
+import type { CreateExportPayload, CreateImportPayload } from '../types';
 
 interface EncodeModalProps {
     isOpen: boolean;
     onClose: () => void;
     type: 'import' | 'export';
-    onSave: (data: any) => void;
+    onSave: (data: CreateImportPayload | CreateExportPayload) => void;
 }
 
 export const EncodeModal: React.FC<EncodeModalProps> = ({ isOpen, onClose, type, onSave }) => {
-    const { theme } = useTheme();
-    const [formData, setFormData] = useState<any>({});
+    const isImport = type === 'import';
+
+    // Form state
+    const [ref, setRef] = useState('');
+    const [bl, setBl] = useState('');
+    const [blsc, setBlsc] = useState('');
+    const [clientId, setClientId] = useState<number | ''>('');
+    const [arrivalDate, setArrivalDate] = useState('');
+    const [vessel, setVessel] = useState('');
+    const [destinationCountryId, setDestinationCountryId] = useState<number | ''>('');
+
+    // TanStack Query hooks for dropdown data
+    const { data: clients = [], isLoading: loadingClients } = useClients(isImport ? 'importer' : 'exporter');
+    const { data: countries = [], isLoading: loadingCountries } = useCountries('export_destination', !isImport);
+
+    // Submission state
+    const [submitting, setSubmitting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    // Scroll lock and form reset when modal opens
+    useEffect(() => {
+        if (isOpen) {
+            // Lock background scroll (scrollbar-gutter in MainLayout handles the shift)
+            const mainElement = document.getElementById('main-content');
+            if (mainElement) {
+                mainElement.style.overflow = 'hidden';
+            }
+
+            // Reset form
+            setRef('');
+            setBl('');
+            setBlsc('');
+            setClientId('');
+            setArrivalDate('');
+            setVessel('');
+            setDestinationCountryId('');
+            setError(null);
+        }
+
+        return () => {
+            const mainElement = document.getElementById('main-content');
+            if (mainElement) {
+                mainElement.style.overflow = '';
+            }
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+        };
+    }, [isOpen]);
 
     if (!isOpen) return null;
 
-    const isImport = type === 'import';
+    // Today's date for min attribute
+    const today = new Date().toISOString().split('T')[0];
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
-        setFormData((prev: any) => ({ ...prev, [name]: value }));
-    };
-
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        onSave(formData);
-        onClose();
+        if (clientId === '') return;
+
+        setSubmitting(true);
+        setError(null);
+
+        try {
+            if (isImport) {
+                const payload: CreateImportPayload = {
+                    customs_ref_no: ref,
+                    bl_no: bl,
+                    selective_color: blsc as 'green' | 'yellow' | 'red',
+                    importer_id: clientId,
+                    arrival_date: arrivalDate,
+                };
+                await onSave(payload);
+            } else {
+                const payload: CreateExportPayload = {
+                    shipper_id: clientId,
+                    bl_no: bl,
+                    vessel: vessel,
+                    ...(destinationCountryId !== '' && { destination_country_id: destinationCountryId }),
+                };
+                await onSave(payload);
+            }
+            onClose();
+        } catch (err: unknown) {
+            const msg =
+                err instanceof Error
+                    ? err.message
+                    : 'Failed to save transaction. Please try again.';
+            setError(msg);
+        } finally {
+            setSubmitting(false);
+        }
     };
 
-    const statusOptions = isImport
-        ? ['Cleared', 'Pending', 'Delayed', 'In Transit']
-        : ['Shipped', 'Processing', 'Delayed', 'In Transit'];
+    const blscOptions = [
+        { value: 'green', label: 'Green' },
+        { value: 'yellow', label: 'Yellow' },
+        { value: 'red', label: 'Red' },
+    ];
 
-    const blscOptions = ['Green', 'Yellow', 'Orange', 'Red', 'Blue'];
+    const inputClass =
+        'w-full px-4 py-3 bg-input-bg border border-border-strong rounded-xl text-sm font-bold text-text-primary focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 outline-none transition-all placeholder:text-text-muted';
+
+    const labelClass =
+        'text-[11px] font-black text-text-muted uppercase tracking-widest ml-1';
+
+    const selectClass = `${inputClass} appearance-none cursor-pointer`;
 
     return (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[150] p-4">
-            <div className={`rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200 transition-colors ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'
-                }`}>
+        <div
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[150] p-4 overflow-hidden"
+            onClick={onClose}
+        >
+            <div
+                className="bg-surface rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200 border border-border transition-all"
+                onClick={(e) => e.stopPropagation()}
+            >
                 {/* Header */}
-                <div className={`flex items-center justify-between p-6 border-b transition-colors ${theme === 'dark' ? 'border-gray-700' : 'border-gray-100'
-                    }`}>
+                <div className="flex items-center justify-between p-6 border-b border-border">
                     <div className="flex items-center gap-4">
-                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-black shadow-lg ring-4 transition-colors ${theme === 'dark' ? 'bg-white ring-gray-700' : 'bg-white ring-gray-50'
-                            }`}>
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 6v12m6-6H6" />
-                            </svg>
+                        <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center text-white shadow-lg ring-4 ring-blue-50">
+                            <Icon name="plus" className="w-6 h-6" />
                         </div>
                         <div>
-                            <h3 className={`text-xl font-bold transition-colors ${theme === 'dark' ? 'text-white' : 'text-gray-900'
-                                }`}>Encode {isImport ? 'Import' : 'Export'}</h3>
-                            <p className={`text-xs font-medium transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-                                }`}>Please fill in the details of the new transaction</p>
+                            <h3 className="text-xl font-bold text-text-primary transition-colors">
+                                Encode {isImport ? 'Import' : 'Export'}
+                            </h3>
+                            <p className="text-xs text-text-muted font-medium">
+                                Please fill in the details of the new transaction
+                            </p>
                         </div>
                     </div>
                     <button
                         onClick={onClose}
-                        className={`p-2 rounded-xl transition-all ${theme === 'dark'
-                            ? 'text-gray-400 hover:text-white hover:bg-gray-700'
-                            : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
-                            }`}
+                        className="p-2 text-text-muted hover:text-text-secondary hover:bg-hover rounded-xl transition-all"
                     >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
+                        <Icon name="x" className="w-6 h-6" />
                     </button>
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-8 space-y-6">
+                    {/* Error Banner */}
+                    {error && (
+                        <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600 font-medium">
+                            {error}
+                        </div>
+                    )}
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Import Specific Fields */}
+                        {/* Import Only: BLSC (Selective Color) */}
                         {isImport && (
-                            <>
-                                <div className="space-y-2 md:col-span-2">
-                                    <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest ml-1">
-                                        BLSC (Selective Color)
-                                    </label>
-                                    <div className="relative">
-                                        <select
-                                            required
-                                            name="blsc"
-                                            className={`w-full px-4 py-3 border rounded-xl text-sm font-bold outline-none transition-all appearance-none cursor-pointer focus:ring-2 focus:border-transparent ${theme === 'dark'
-                                                ? 'bg-gray-700 border-gray-600 text-white focus:ring-blue-500'
-                                                : 'bg-gray-50 border-gray-200 text-gray-900 focus:ring-black'
-                                                }`}
-                                            onChange={handleInputChange}
-                                        >
-                                            <option value="">Select Color</option>
-                                            {blscOptions.map(opt => (
-                                                <option key={opt} value={opt}>{opt}</option>
-                                            ))}
-                                        </select>
-                                        <svg className="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                                        </svg>
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest ml-1">
-                                        Customs Ref No.
-                                    </label>
-                                    <input
+                            <div className="space-y-2 md:col-span-2">
+                                <label className={labelClass}>BLSC (Selective Color)</label>
+                                <div className="relative">
+                                    <select
                                         required
-                                        name="ref"
-                                        type="text"
-                                        placeholder="e.g. REF-2024-001"
-                                        className={`w-full px-4 py-3 border rounded-xl text-sm font-bold outline-none transition-all focus:ring-2 focus:border-transparent ${theme === 'dark'
-                                            ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-500 focus:ring-blue-500'
-                                            : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-300 focus:ring-black'
-                                            }`}
-                                        onChange={handleInputChange}
-                                    />
+                                        value={blsc}
+                                        className={selectClass}
+                                        onChange={(e) => setBlsc(e.target.value)}
+                                    >
+                                        <option value="">Select Color</option>
+                                        {blscOptions.map(opt => (
+                                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                        ))}
+                                    </select>
+                                    <Icon name="chevron-down" className="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                                 </div>
-                                <div className="space-y-2">
-                                    <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest ml-1">
-                                        Bill of Lading
-                                    </label>
-                                    <input
-                                        required
-                                        name="bl"
-                                        type="text"
-                                        placeholder="e.g. BL-78542136"
-                                        className={`w-full px-4 py-3 border rounded-xl text-sm font-bold outline-none transition-all focus:ring-2 focus:border-transparent ${theme === 'dark'
-                                            ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-500 focus:ring-blue-500'
-                                            : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-300 focus:ring-black'
-                                            }`}
-                                        onChange={handleInputChange}
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest ml-1">
-                                        Status
-                                    </label>
-                                    <div className="relative">
-                                        <select
-                                            required
-                                            name="status"
-                                            className={`w-full px-4 py-3 border rounded-xl text-sm font-bold outline-none transition-all appearance-none cursor-pointer focus:ring-2 focus:border-transparent ${theme === 'dark'
-                                                ? 'bg-gray-700 border-gray-600 text-white focus:ring-blue-500'
-                                                : 'bg-gray-50 border-gray-200 text-gray-900 focus:ring-black'
-                                                }`}
-                                            onChange={handleInputChange}
-                                        >
-                                            <option value="">Select Status</option>
-                                            {statusOptions.map(opt => (
-                                                <option key={opt} value={opt}>{opt}</option>
-                                            ))}
-                                        </select>
-                                        <svg className="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                                        </svg>
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest ml-1">
-                                        Importer
-                                    </label>
-                                    <input
-                                        required
-                                        name="party"
-                                        type="text"
-                                        placeholder="Enter Importer Name"
-                                        className={`w-full px-4 py-3 border rounded-xl text-sm font-bold outline-none transition-all focus:ring-2 focus:border-transparent ${theme === 'dark'
-                                            ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-500 focus:ring-blue-500'
-                                            : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-300 focus:ring-black'
-                                            }`}
-                                        onChange={handleInputChange}
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest ml-1">
-                                        Arrival Date
-                                    </label>
-                                    <input
-                                        required
-                                        name="arrivalDate"
-                                        type="date"
-                                        className={`w-full px-4 py-3 border rounded-xl text-sm font-bold outline-none transition-all focus:ring-2 focus:border-transparent ${theme === 'dark'
-                                            ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-500 focus:ring-blue-500'
-                                            : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-300 focus:ring-black'
-                                            }`}
-                                        onChange={handleInputChange}
-                                    />
-                                </div>
-                                <div className="space-y-2 md:col-span-2">
-                                    <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest ml-1">
-                                        Port of Discharge
-                                    </label>
-                                    <input
-                                        required
-                                        name="portOfDischarge"
-                                        type="text"
-                                        placeholder="Enter Port of Discharge"
-                                        className={`w-full px-4 py-3 border rounded-xl text-sm font-bold outline-none transition-all focus:ring-2 focus:border-transparent ${theme === 'dark'
-                                            ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-500 focus:ring-blue-500'
-                                            : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-300 focus:ring-black'
-                                            }`}
-                                        onChange={handleInputChange}
-                                    />
-                                </div>
-                            </>
+                            </div>
                         )}
 
-                        {/* Export Specific Fields (Reordered) */}
+                        {/* Ref ID / Ref No */}
+                        {isImport && (
+                            <div className="space-y-2">
+                                <label className={labelClass}>Customs Ref No.</label>
+                                <input
+                                    required
+                                    type="text"
+                                    value={ref}
+                                    placeholder="e.g. REF-2024-001"
+                                    className={inputClass}
+                                    onChange={(e) => setRef(e.target.value)}
+                                />
+                            </div>
+                        )}
+
+                        {/* Client Dropdown */}
+                        <div className="space-y-2">
+                            <label className={labelClass}>
+                                {isImport ? 'Importer' : 'Shipper'}
+                            </label>
+                            <div className="relative">
+                                <select
+                                    required
+                                    value={clientId}
+                                    className={selectClass}
+                                    onChange={(e) => setClientId(e.target.value ? Number(e.target.value) : '')}
+                                    disabled={loadingClients}
+                                >
+                                    <option value="">
+                                        {loadingClients ? 'Loading...' : `Select ${isImport ? 'Importer' : 'Shipper'}`}
+                                    </option>
+                                    {clients.map(client => (
+                                        <option key={client.id} value={client.id}>{client.name}</option>
+                                    ))}
+                                </select>
+                                <Icon name="chevron-down" className="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                            </div>
+                        </div>
+
+                        {/* Bill of Lading */}
+                        <div className="space-y-2">
+                            <label className={labelClass}>Bill of Lading</label>
+                            <input
+                                required
+                                type="text"
+                                value={bl}
+                                placeholder="e.g. BL-78542136"
+                                className={inputClass}
+                                onChange={(e) => setBl(e.target.value)}
+                            />
+                        </div>
+
+                        {/* Export Only: Vessel */}
                         {!isImport && (
-                            <>
-                                {/* 1. Shipper */}
-                                <div className="space-y-2">
-                                    <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest ml-1">
-                                        Shipper
-                                    </label>
-                                    <input
-                                        required
-                                        name="party"
-                                        type="text"
-                                        placeholder="Enter Shipper Name"
-                                        className={`w-full px-4 py-3 border rounded-xl text-sm font-bold outline-none transition-all focus:ring-2 focus:border-transparent ${theme === 'dark'
-                                            ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-500 focus:ring-blue-500'
-                                            : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-300 focus:ring-black'
-                                            }`}
-                                        onChange={handleInputChange}
-                                    />
-                                </div>
+                            <div className="space-y-2">
+                                <label className={labelClass}>Vessel</label>
+                                <input
+                                    required
+                                    type="text"
+                                    value={vessel}
+                                    placeholder="Enter Vessel Name"
+                                    className={inputClass}
+                                    onChange={(e) => setVessel(e.target.value)}
+                                />
+                            </div>
+                        )}
 
-                                {/* 2. Bill of Lading */}
-                                <div className="space-y-2">
-                                    <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest ml-1">
-                                        Bill of Lading
-                                    </label>
-                                    <input
+                        {/* Export Only: Port of Destination */}
+                        {!isImport && (
+                            <div className="space-y-2 md:col-span-2">
+                                <label className={labelClass}>Port of Destination</label>
+                                <div className="relative">
+                                    <select
                                         required
-                                        name="bl"
-                                        type="text"
-                                        placeholder="e.g. BL-78542136"
-                                        className={`w-full px-4 py-3 border rounded-xl text-sm font-bold outline-none transition-all focus:ring-2 focus:border-transparent ${theme === 'dark'
-                                            ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-500 focus:ring-blue-500'
-                                            : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-300 focus:ring-black'
-                                            }`}
-                                        onChange={handleInputChange}
-                                    />
+                                        value={destinationCountryId}
+                                        className={selectClass}
+                                        onChange={(e) => setDestinationCountryId(e.target.value ? Number(e.target.value) : '')}
+                                        disabled={loadingCountries}
+                                    >
+                                        <option value="">
+                                            {loadingCountries ? 'Loading...' : 'Select Destination Country'}
+                                        </option>
+                                        {countries.map(country => (
+                                            <option key={country.id} value={country.id}>{country.name}</option>
+                                        ))}
+                                    </select>
+                                    <Icon name="chevron-down" className="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                                 </div>
+                            </div>
+                        )}
 
-                                {/* 3. Vessel */}
-                                <div className="space-y-2">
-                                    <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest ml-1">
-                                        Vessel
-                                    </label>
-                                    <input
-                                        required
-                                        name="extra"
-                                        type="text"
-                                        placeholder="Enter Vessel Name"
-                                        className={`w-full px-4 py-3 border rounded-xl text-sm font-bold outline-none transition-all focus:ring-2 focus:border-transparent ${theme === 'dark'
-                                            ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-500 focus:ring-blue-500'
-                                            : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-300 focus:ring-black'
-                                            }`}
-                                        onChange={handleInputChange}
-                                    />
-                                </div>
-
-                                {/* 4. Departure Date */}
-                                <div className="space-y-2">
-                                    <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest ml-1">
-                                        Departure Date
-                                    </label>
-                                    <input
-                                        required
-                                        name="departureDate"
-                                        type="date"
-                                        className={`w-full px-4 py-3 border rounded-xl text-sm font-bold outline-none transition-all focus:ring-2 focus:border-transparent ${theme === 'dark'
-                                            ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-500 focus:ring-blue-500'
-                                            : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-300 focus:ring-black'
-                                            }`}
-                                        onChange={handleInputChange}
-                                    />
-                                </div>
-
-                                {/* 5. Port of Destination */}
-                                <div className="space-y-2 md:col-span-2">
-                                    <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest ml-1">
-                                        Port of Destination
-                                    </label>
-                                    <input
-                                        required
-                                        name="portOfDestination"
-                                        type="text"
-                                        placeholder="Enter Port of Destination"
-                                        className={`w-full px-4 py-3 border rounded-xl text-sm font-bold outline-none transition-all focus:ring-2 focus:border-transparent ${theme === 'dark'
-                                            ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-500 focus:ring-blue-500'
-                                            : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-300 focus:ring-black'
-                                            }`}
-                                        onChange={handleInputChange}
-                                    />
-                                </div>
-                            </>
+                        {/* Import Only: Arrival Date */}
+                        {isImport && (
+                            <div className="space-y-2 md:col-span-2">
+                                <label className={labelClass}>Arrival Date</label>
+                                <input
+                                    required
+                                    type="date"
+                                    value={arrivalDate}
+                                    min={today}
+                                    className={inputClass}
+                                    onChange={(e) => setArrivalDate(e.target.value)}
+                                />
+                            </div>
                         )}
                     </div>
 
-                    <div className={`flex items-center gap-3 pt-4 border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-100'}`}>
+                    <div className="flex items-center gap-3 pt-4 border-t border-border">
                         <button
                             type="button"
                             onClick={onClose}
-                            className={`flex-1 px-6 py-4 border rounded-2xl text-sm font-bold transition-all active:scale-95 ${theme === 'dark'
-                                ? 'bg-gray-800 border-gray-600 text-gray-300 hover:bg-gray-700'
-                                : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
-                                }`}
+                            disabled={submitting}
+                            className="flex-1 px-6 py-4 bg-surface-secondary border border-border-strong text-text-secondary rounded-2xl text-sm font-bold hover:bg-hover transition-all active:scale-95 disabled:opacity-50"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
-                            className={`flex-1 px-6 py-4 text-black rounded-2xl text-sm font-bold transition-all shadow-xl active:scale-95 flex items-center justify-center gap-2 ${theme === 'dark'
-                                ? 'bg-white hover:bg-gray-100'
-                                : 'bg-white border border-gray-200 hover:bg-gray-50'
-                                }`}
+                            disabled={submitting}
+                            className="flex-1 px-6 py-4 bg-blue-600 text-white rounded-2xl text-sm font-bold hover:bg-blue-700 transition-all shadow-xl active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
-                            </svg>
-                            Encode
+                            {submitting ? (
+                                <>
+                                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white" />
+                                    Saving...
+                                </>
+                            ) : (
+                                <>
+                                    <Icon name="check-circle" className="w-4 h-4" />
+                                    Encode
+                                </>
+                            )}
                         </button>
                     </div>
                 </form>
