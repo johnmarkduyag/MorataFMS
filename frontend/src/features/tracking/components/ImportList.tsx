@@ -295,7 +295,7 @@ export const ImportList = () => {
                                 <p className="text-sm text-text-secondary font-bold">{row.bl}</p>
                                 <span className="inline-flex">
                                     <span
-                                        className="px-2.5 py-0.5 rounded-full text-[10px] font-black text-white uppercase tracking-wider shadow-sm border border-black/5"
+                                        className="px-2.5 py-0.5 rounded-md text-[10px] font-black text-white uppercase tracking-wider shadow-sm border border-black/5"
                                         style={{
                                             backgroundColor: row.status === 'Cleared' ? '#4cd964' :
                                                 row.status === 'Pending' ? '#ffcc00' :
