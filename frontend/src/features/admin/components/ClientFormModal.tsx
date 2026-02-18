@@ -33,7 +33,9 @@ export const ClientFormModal = ({ isOpen, onClose, onSubmit, client, mode }: Cli
         const loadCountries = async () => {
             try {
                 const response = await api.get('/api/countries');
-                setCountries(response.data || []);
+                // CountryController returns { data: [...] }, so we need response.data.data
+                const list = response.data?.data ?? response.data ?? [];
+                setCountries(Array.isArray(list) ? list : []);
             } catch (err) {
                 console.error('Failed to load countries:', err);
             }
@@ -114,8 +116,8 @@ export const ClientFormModal = ({ isOpen, onClose, onSubmit, client, mode }: Cli
                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                 required
                                 className={`w-full px-4 py-3 rounded-xl border transition-colors ${theme === 'dark'
-                                        ? 'bg-gray-700 border-gray-600 text-white focus:border-gray-500'
-                                        : 'bg-white border-gray-300 text-gray-900 focus:border-gray-400'
+                                    ? 'bg-gray-700 border-gray-600 text-white focus:border-gray-500'
+                                    : 'bg-white border-gray-300 text-gray-900 focus:border-gray-400'
                                     } focus:outline-none`}
                             />
                         </div>
@@ -130,8 +132,8 @@ export const ClientFormModal = ({ isOpen, onClose, onSubmit, client, mode }: Cli
                                 onChange={(e) => setFormData({ ...formData, type: e.target.value as ClientType })}
                                 required
                                 className={`w-full px-4 py-3 rounded-xl border transition-colors ${theme === 'dark'
-                                        ? 'bg-gray-700 border-gray-600 text-white focus:border-gray-500'
-                                        : 'bg-white border-gray-300 text-gray-900 focus:border-gray-400'
+                                    ? 'bg-gray-700 border-gray-600 text-white focus:border-gray-500'
+                                    : 'bg-white border-gray-300 text-gray-900 focus:border-gray-400'
                                     } focus:outline-none capitalize`}
                             >
                                 {CLIENT_TYPES.map((type) => (
@@ -151,8 +153,8 @@ export const ClientFormModal = ({ isOpen, onClose, onSubmit, client, mode }: Cli
                                 value={formData.country_id || ''}
                                 onChange={(e) => setFormData({ ...formData, country_id: e.target.value ? Number(e.target.value) : null })}
                                 className={`w-full px-4 py-3 rounded-xl border transition-colors ${theme === 'dark'
-                                        ? 'bg-gray-700 border-gray-600 text-white focus:border-gray-500'
-                                        : 'bg-white border-gray-300 text-gray-900 focus:border-gray-400'
+                                    ? 'bg-gray-700 border-gray-600 text-white focus:border-gray-500'
+                                    : 'bg-white border-gray-300 text-gray-900 focus:border-gray-400'
                                     } focus:outline-none`}
                             >
                                 <option value="">Select a country</option>
@@ -174,8 +176,8 @@ export const ClientFormModal = ({ isOpen, onClose, onSubmit, client, mode }: Cli
                                 value={formData.contact_person}
                                 onChange={(e) => setFormData({ ...formData, contact_person: e.target.value })}
                                 className={`w-full px-4 py-3 rounded-xl border transition-colors ${theme === 'dark'
-                                        ? 'bg-gray-700 border-gray-600 text-white focus:border-gray-500'
-                                        : 'bg-white border-gray-300 text-gray-900 focus:border-gray-400'
+                                    ? 'bg-gray-700 border-gray-600 text-white focus:border-gray-500'
+                                    : 'bg-white border-gray-300 text-gray-900 focus:border-gray-400'
                                     } focus:outline-none`}
                             />
                         </div>
@@ -190,8 +192,8 @@ export const ClientFormModal = ({ isOpen, onClose, onSubmit, client, mode }: Cli
                                 value={formData.contact_email}
                                 onChange={(e) => setFormData({ ...formData, contact_email: e.target.value })}
                                 className={`w-full px-4 py-3 rounded-xl border transition-colors ${theme === 'dark'
-                                        ? 'bg-gray-700 border-gray-600 text-white focus:border-gray-500'
-                                        : 'bg-white border-gray-300 text-gray-900 focus:border-gray-400'
+                                    ? 'bg-gray-700 border-gray-600 text-white focus:border-gray-500'
+                                    : 'bg-white border-gray-300 text-gray-900 focus:border-gray-400'
                                     } focus:outline-none`}
                             />
                         </div>
@@ -206,8 +208,8 @@ export const ClientFormModal = ({ isOpen, onClose, onSubmit, client, mode }: Cli
                                 value={formData.contact_phone}
                                 onChange={(e) => setFormData({ ...formData, contact_phone: e.target.value })}
                                 className={`w-full px-4 py-3 rounded-xl border transition-colors ${theme === 'dark'
-                                        ? 'bg-gray-700 border-gray-600 text-white focus:border-gray-500'
-                                        : 'bg-white border-gray-300 text-gray-900 focus:border-gray-400'
+                                    ? 'bg-gray-700 border-gray-600 text-white focus:border-gray-500'
+                                    : 'bg-white border-gray-300 text-gray-900 focus:border-gray-400'
                                     } focus:outline-none`}
                             />
                         </div>
@@ -222,8 +224,8 @@ export const ClientFormModal = ({ isOpen, onClose, onSubmit, client, mode }: Cli
                                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                                 rows={3}
                                 className={`w-full px-4 py-3 rounded-xl border transition-colors ${theme === 'dark'
-                                        ? 'bg-gray-700 border-gray-600 text-white focus:border-gray-500'
-                                        : 'bg-white border-gray-300 text-gray-900 focus:border-gray-400'
+                                    ? 'bg-gray-700 border-gray-600 text-white focus:border-gray-500'
+                                    : 'bg-white border-gray-300 text-gray-900 focus:border-gray-400'
                                     } focus:outline-none`}
                             />
                         </div>
@@ -235,8 +237,8 @@ export const ClientFormModal = ({ isOpen, onClose, onSubmit, client, mode }: Cli
                             onClick={onClose}
                             disabled={isSubmitting}
                             className={`flex-1 px-6 py-3 rounded-xl font-bold border transition-colors ${theme === 'dark'
-                                    ? 'border-gray-600 text-white hover:bg-gray-700'
-                                    : 'border-gray-200 text-gray-900 hover:bg-gray-50'
+                                ? 'border-gray-600 text-white hover:bg-gray-700'
+                                : 'border-gray-200 text-gray-900 hover:bg-gray-50'
                                 } disabled:opacity-50`}
                         >
                             Cancel

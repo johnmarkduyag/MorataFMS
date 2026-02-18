@@ -95,8 +95,8 @@ export const ClientManagement = () => {
     const filteredClients = clients.filter(client =>
         client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         client.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        client.country?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        client.contact_person?.toLowerCase().includes(searchTerm.toLowerCase())
+        (client.country?.name?.toLowerCase() ?? '').includes(searchTerm.toLowerCase()) ||
+        (client.contact_person?.toLowerCase() ?? '').includes(searchTerm.toLowerCase())
     );
 
     return (
@@ -130,8 +130,8 @@ export const ClientManagement = () => {
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className={`w-full px-4 py-3 rounded-xl border transition-colors ${theme === 'dark'
-                                ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500'
-                                : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400'
+                            ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500'
+                            : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400'
                             } focus:outline-none focus:border-gray-400`}
                     />
                 </div>
@@ -229,8 +229,8 @@ export const ClientManagement = () => {
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className={`inline-flex px-3 py-1 rounded-full text-xs font-bold ${client.is_active
-                                                    ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
-                                                    : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
+                                                ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                                                : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
                                                 }`}>
                                                 {client.is_active ? 'Active' : 'Inactive'}
                                             </span>
@@ -239,8 +239,8 @@ export const ClientManagement = () => {
                                             <button
                                                 onClick={() => handleEdit(client)}
                                                 className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${theme === 'dark'
-                                                        ? 'bg-gray-700 text-white hover:bg-gray-600'
-                                                        : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
+                                                    ? 'bg-gray-700 text-white hover:bg-gray-600'
+                                                    : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
                                                     }`}
                                             >
                                                 Edit
@@ -248,8 +248,8 @@ export const ClientManagement = () => {
                                             <button
                                                 onClick={() => handleToggleActive(client.id)}
                                                 className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${client.is_active
-                                                        ? 'bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-900/50'
-                                                        : 'bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-300 dark:hover:bg-green-900/50'
+                                                    ? 'bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-900/50'
+                                                    : 'bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-300 dark:hover:bg-green-900/50'
                                                     }`}
                                             >
                                                 {client.is_active ? 'Deactivate' : 'Activate'}
@@ -257,8 +257,8 @@ export const ClientManagement = () => {
                                             <button
                                                 onClick={() => handleViewTransactions(client)}
                                                 className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${theme === 'dark'
-                                                        ? 'bg-blue-900/30 text-blue-300 hover:bg-blue-900/50'
-                                                        : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                                                    ? 'bg-blue-900/30 text-blue-300 hover:bg-blue-900/50'
+                                                    : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
                                                     }`}
                                             >
                                                 View History
