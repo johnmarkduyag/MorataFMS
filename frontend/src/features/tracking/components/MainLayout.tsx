@@ -96,26 +96,27 @@ export const MainLayout = () => {
                 <div className="mb-8">
                     <p className="text-gray-400 dark:text-gray-500 text-[11px] uppercase tracking-wider px-3 mb-4 font-bold">Main Menu</p>
                     <nav className="space-y-1">
-                        {navItems.map((item) => (
-                            <button
-                                key={item.label}
-                                onClick={() => item.path !== '#' && navigate(item.path)}
-                                className={`w-full text-left flex items-center gap-3 px-3 py-3 rounded-xl text-sm transition-all whitespace-nowrap ${location.pathname === item.path
-                                    ? 'bg-gray-900 text-white dark:bg-zinc-800 dark:text-white shadow-md'
-                                    : theme === 'dark' || theme === 'mix'
-                                        ? 'text-gray-300 hover:bg-white/5'
-                                        : 'text-gray-600 hover:bg-black/5'
-                                    }`}
-                            >
-                                <svg className={`w-5 h-5 ${location.pathname === item.path
-                                    ? 'text-white'
-                                    : theme === 'dark' || theme === 'mix' ? 'text-white' : 'text-black'
-                                    }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={item.icon} />
-                                </svg>
-                                {item.label}
-                            </button>
-                        ))}
+                        {navItems.map((item) => {
+                            const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
+                            return (
+                                <button
+                                    key={item.label}
+                                    onClick={() => item.path !== '#' && navigate(item.path)}
+                                    className={`w-full text-left flex items-center gap-3 px-3 py-3 rounded-xl text-sm transition-all whitespace-nowrap ${isActive
+                                            ? 'bg-gray-800 text-white shadow-md'
+                                            : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                                        }`}
+                                >
+                                    <svg
+                                        className={`w-5 h-5 ${isActive ? 'text-white' : 'text-gray-400'}`}
+                                        fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                    >
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={item.icon} />
+                                    </svg>
+                                    {item.label}
+                                </button>
+                            );
+                        })}
                     </nav>
                 </div>
 
