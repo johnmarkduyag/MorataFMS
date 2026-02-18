@@ -40,7 +40,6 @@ export const MainLayout = () => {
     }, []);
 
     const handleLogout = async () => {
-        console.log('Logging out...');
         try {
             await logout();
         } catch (error) {
@@ -66,7 +65,9 @@ export const MainLayout = () => {
         { label: 'Documents', path: '/documents', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
     ];
 
-    const navItems = user?.role === 'admin' ? adminItems : encoderItems;
+    // Admin role gets admin nav; all other roles (encoder, broker, supervisor, manager) get encoder nav
+    const isAdmin = user?.role === 'admin';
+    const navItems = isAdmin ? adminItems : encoderItems;
 
     const settingsItems = [
         { label: 'Profile', path: '/profile', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' },
@@ -74,138 +75,125 @@ export const MainLayout = () => {
         { label: 'Notifications', path: '/notifications', icon: 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9' },
     ];
 
+    const isDark = theme === 'dark' || theme === 'mix';
     const isDetailsPage = location.pathname.startsWith('/tracking');
 
+    const NavItem = ({ item, isActive }: { item: { label: string; path: string; icon: string }; isActive: boolean }) => (
+        <button
+            onClick={() => item.path !== '#' && navigate(item.path)}
+            className={`w-full text-left flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${isActive
+                    ? isDark
+                        ? 'bg-white/10 text-white'
+                        : 'bg-black/8 text-black'
+                    : isDark
+                        ? 'text-gray-400 hover:bg-white/5 hover:text-white'
+                        : 'text-gray-500 hover:bg-black/5 hover:text-black'
+                }`}
+        >
+            <svg
+                className={`w-4 h-4 shrink-0 ${isActive
+                        ? isDark ? 'text-white' : 'text-black'
+                        : isDark ? 'text-gray-400' : 'text-gray-500'
+                    }`}
+                fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={item.icon} />
+            </svg>
+            {item.label}
+        </button>
+    );
+
     return (
-        <div className={`h-screen flex overflow-hidden text-gray-900 ${theme === 'dark' || theme === 'mix' ? 'bg-black' : 'bg-white'
-            }`}>
+        <div className={`h-screen flex overflow-hidden ${isDark ? 'bg-black' : 'bg-gray-100'}`}>
 
             {/* Sidebar */}
-            <aside className={`w-72 h-full flex flex-col overflow-y-auto py-6 px-4 shrink-0 ${isDetailsPage ? 'fixed z-10' : ''} ${theme === 'dark' || theme === 'mix' ? 'bg-black' : 'bg-white'
-                }`}>
+            <aside className={`w-64 h-full flex flex-col shrink-0 py-5 px-3 ${isDetailsPage ? 'fixed z-10' : ''} ${isDark ? 'bg-black' : 'bg-gray-100'}`}>
+
                 {/* Logo */}
-                <div className="flex items-center gap-2 px-2 mb-8 cursor-pointer" onClick={() => navigate('/')}>
-                    <div className="w-8 h-8">
+                <div className="flex items-center gap-2.5 px-2 mb-6 cursor-pointer" onClick={() => navigate('/')}>
+                    <div className="w-7 h-7 shrink-0">
                         <img src="/logo.jpg" alt="F.M Morata Logo" className="w-full h-full object-cover rounded-full" />
                     </div>
-                    <span className={`font-bold text-sm ${theme === 'dark' || theme === 'mix' ? 'text-white' : 'text-black'
-                        }`}>F.M Morata</span>
+                    <span className={`font-bold text-sm ${isDark ? 'text-white' : 'text-black'}`}>F.M Morata</span>
                 </div>
 
                 {/* Main Menu */}
-                <div className="mb-8">
-                    <p className={`text-[11px] uppercase tracking-wider px-3 mb-4 font-bold ${theme === 'dark' || theme === 'mix' ? 'text-gray-500' : 'text-gray-400'}`}>Main Menu</p>
-                    <nav className="space-y-1">
+                <div className="mb-4">
+                    <p className={`text-[10px] uppercase tracking-widest px-3 mb-2 font-bold ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>
+                        Main Menu
+                    </p>
+                    <nav className="space-y-0.5">
                         {navItems.map((item) => {
                             const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
-                            return (
-                                <button
-                                    key={item.label}
-                                    onClick={() => item.path !== '#' && navigate(item.path)}
-                                    className={`w-full text-left flex items-center gap-3 px-3 py-3 rounded-xl text-sm transition-all whitespace-nowrap ${isActive
-                                            ? theme === 'dark' || theme === 'mix'
-                                                ? 'bg-white/10 text-white shadow-md'
-                                                : 'bg-black/10 text-black shadow-md'
-                                            : theme === 'dark' || theme === 'mix'
-                                                ? 'text-gray-300 hover:bg-white/5 hover:text-white'
-                                                : 'text-gray-600 hover:bg-black/5 hover:text-black'
-                                        }`}
-                                >
-                                    <svg
-                                        className={`w-5 h-5 ${isActive
-                                                ? theme === 'dark' || theme === 'mix' ? 'text-white' : 'text-black'
-                                                : theme === 'dark' || theme === 'mix' ? 'text-gray-300' : 'text-gray-600'
-                                            }`}
-                                        fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                                    >
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={item.icon} />
-                                    </svg>
-                                    {item.label}
-                                </button>
-                            );
+                            return <NavItem key={item.label} item={item} isActive={isActive} />;
                         })}
                     </nav>
                 </div>
 
+                {/* Divider */}
+                <div className={`mx-3 my-2 h-px ${isDark ? 'bg-white/8' : 'bg-black/8'}`} />
+
                 {/* Settings */}
-                <div className="mb-8">
-                    <p className={`text-[11px] uppercase tracking-wider px-3 mb-4 font-bold ${theme === 'dark' || theme === 'mix' ? 'text-gray-500' : 'text-gray-400'}`}>Settings</p>
-                    <nav className="space-y-1">
+                <div className="mb-2">
+                    <p className={`text-[10px] uppercase tracking-widest px-3 mb-2 font-bold ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>
+                        Settings
+                    </p>
+                    <nav className="space-y-0.5">
                         {settingsItems.map((item) => {
                             const isActive = location.pathname === item.path;
-                            return (
-                                <button
-                                    key={item.label}
-                                    onClick={() => navigate(item.path)}
-                                    className={`w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all whitespace-nowrap ${isActive
-                                            ? theme === 'dark' || theme === 'mix'
-                                                ? 'bg-white/10 text-white'
-                                                : 'bg-black/10 text-black'
-                                            : theme === 'dark' || theme === 'mix'
-                                                ? 'text-gray-300 hover:bg-white/5 hover:text-white'
-                                                : 'text-gray-600 hover:bg-black/5 hover:text-black'
-                                        }`}
-                                >
-                                    <svg
-                                        className={`w-5 h-5 ${isActive
-                                                ? theme === 'dark' || theme === 'mix' ? 'text-white' : 'text-black'
-                                                : theme === 'dark' || theme === 'mix' ? 'text-gray-300' : 'text-gray-600'
-                                            }`}
-                                        fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                                    >
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={item.icon} />
-                                    </svg>
-                                    {item.label}
-                                </button>
-                            );
+                            return <NavItem key={item.label} item={item} isActive={isActive} />;
                         })}
                     </nav>
+                </div>
 
-                    {/* Theme Toggle Button */}
+                {/* Spacer */}
+                <div className="flex-1" />
+
+                {/* Bottom actions */}
+                <div className="space-y-0.5">
+                    {/* Theme Toggle */}
                     <button
                         onClick={toggleTheme}
-                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm mt-1 transition-all ${theme === 'dark' || theme === 'mix'
-                                ? 'text-gray-300 hover:bg-white/5 hover:text-white'
-                                : 'text-gray-600 hover:bg-black/5 hover:text-black'
+                        className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all ${isDark
+                                ? 'text-gray-400 hover:bg-white/5 hover:text-white'
+                                : 'text-gray-500 hover:bg-black/5 hover:text-black'
                             }`}
                     >
-                        <svg
-                            className={`w-5 h-5 ${theme === 'dark' || theme === 'mix' ? 'text-gray-300' : 'text-gray-600'}`}
-                            fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                        >
+                        <svg className={`w-4 h-4 shrink-0 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={
-                                theme === 'light' ? "M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
-                                    : theme === 'dark' ? "M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                                theme === 'light'
+                                    ? "M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+                                    : theme === 'dark'
+                                        ? "M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
                                         : "M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
                             } />
                         </svg>
                         {theme === 'light' ? 'Light Mode' : theme === 'dark' ? 'Dark Mode' : 'Mix Mode'}
                     </button>
 
-                    {/* Sign Out Button */}
+                    {/* Sign Out */}
                     <button
                         onClick={handleLogout}
-                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm mt-4 ${theme === 'dark' || theme === 'mix'
-                            ? 'text-red-400 hover:bg-white/5'
-                            : 'text-red-600 hover:bg-red-50'
+                        className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all ${isDark ? 'text-red-400 hover:bg-white/5' : 'text-red-500 hover:bg-red-50'
                             }`}
                     >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                         </svg>
                         Sign Out
                     </button>
                 </div>
-            </aside >
+            </aside>
 
-            {/* Main Content Area - Rounded Card Look */}
-            < main className={`flex-1 overflow-y-auto p-8 m-4 rounded-[2.5rem] shadow-2xl relative border ${isDetailsPage ? 'ml-80' : ''} ${theme === 'dark' ? 'bg-black border-transparent' : 'bg-white border-white'
+            {/* Main Content Area */}
+            <main className={`flex-1 overflow-y-auto p-6 m-3 rounded-2xl relative border ${isDetailsPage ? 'ml-64' : ''
+                } ${isDark ? 'bg-[#0a0a0a] border-white/5' : 'bg-white border-black/5'
                 }`}>
-                {/* Page Content */}
-                < div className="max-w-7xl mx-auto min-h-full flex flex-col" >
+                <div className="max-w-7xl mx-auto min-h-full flex flex-col">
                     <Outlet context={{ user, dateTime }} />
-                </div >
-            </main >
-        </div >
+                </div>
+            </main>
+        </div>
     );
 };
