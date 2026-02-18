@@ -11,6 +11,42 @@ interface LayoutContext {
     dateTime: { time: string; date: string };
 }
 
+const typeConfig: Record<string, { label: string; color: string; bg: string; icon: string }> = {
+    importer: {
+        label: 'Importer',
+        color: '#0a84ff',
+        bg: 'rgba(10,132,255,0.13)',
+        icon: 'M19 14l-7 7m0 0l-7-7m7 7V3',
+    },
+    exporter: {
+        label: 'Exporter',
+        color: '#30d158',
+        bg: 'rgba(48,209,88,0.13)',
+        icon: 'M5 10l7-7m0 0l7 7m-7-7v18',
+    },
+    both: {
+        label: 'Both',
+        color: '#ff9f0a',
+        bg: 'rgba(255,159,10,0.13)',
+        icon: 'M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4',
+    },
+};
+
+function TypeBadge({ type }: { type: string }) {
+    const cfg = typeConfig[type] ?? { label: type, color: '#8e8e93', bg: 'rgba(142,142,147,0.13)', icon: 'M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z' };
+    return (
+        <span
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold capitalize"
+            style={{ color: cfg.color, backgroundColor: cfg.bg }}
+        >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d={cfg.icon} />
+            </svg>
+            {cfg.label}
+        </span>
+    );
+}
+
 export const ClientManagement = () => {
     const { theme } = useTheme();
     const { dateTime } = useOutletContext<LayoutContext>();
@@ -28,9 +64,9 @@ export const ClientManagement = () => {
         exports: ExportTransaction[];
     }>({ clientName: '', imports: [], exports: [] });
 
-    useEffect(() => {
-        loadClients();
-    }, []);
+    const isDark = theme === 'dark' || theme === 'mix';
+
+    useEffect(() => { loadClients(); }, []);
 
     const loadClients = async () => {
         try {
@@ -101,178 +137,195 @@ export const ClientManagement = () => {
 
     return (
         <div className="space-y-6 p-4">
-            {/* Header Section */}
+            {/* Header */}
             <div className="flex justify-between items-end">
                 <div>
-                    <h1 className={`text-3xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                    <h1 className={`text-3xl font-bold mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>
                         Client Management
                     </h1>
-                    <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                    <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                         Manage clients, toggle status, and view transaction history
                     </p>
                 </div>
                 <div className="text-right">
-                    <p className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                        {dateTime.time}
-                    </p>
-                    <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                        {dateTime.date}
-                    </p>
+                    <p className={`text-2xl font-bold tabular-nums ${isDark ? 'text-white' : 'text-gray-900'}`}>{dateTime.time}</p>
+                    <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{dateTime.date}</p>
                 </div>
             </div>
 
+            {/* Stat Cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                {[
+                    { label: 'Total Clients', value: clients.length, icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4', color: '#0a84ff' },
+                    { label: 'Active', value: clients.filter(c => c.is_active).length, icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', color: '#30d158' },
+                    { label: 'Importers', value: clients.filter(c => c.type === 'importer' || c.type === 'both').length, icon: 'M19 14l-7 7m0 0l-7-7m7 7V3', color: '#64d2ff' },
+                    { label: 'Exporters', value: clients.filter(c => c.type === 'exporter' || c.type === 'both').length, icon: 'M5 10l7-7m0 0l7 7m-7-7v18', color: '#ff9f0a' },
+                ].map(stat => (
+                    <div key={stat.label} className={`rounded-2xl p-4 border ${isDark ? 'bg-gray-900 border-gray-800' : 'bg-gray-50 border-gray-100'}`}>
+                        <div className="flex items-start justify-between">
+                            <div>
+                                <p className={`text-3xl font-bold tabular-nums ${isDark ? 'text-white' : 'text-gray-900'}`}>{stat.value}</p>
+                                <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{stat.label}</p>
+                            </div>
+                            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${stat.color}22` }}>
+                                <svg className="w-5 h-5" fill="none" stroke={stat.color} viewBox="0 0 24 24" strokeWidth={1.8}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d={stat.icon} />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
             {/* Actions Bar */}
-            <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center justify-between">
-                <div className="flex-1 max-w-md">
+            <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+                <div className="relative flex-1 max-w-sm">
+                    <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
                     <input
                         type="text"
                         placeholder="Search clients..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className={`w-full px-4 py-3 rounded-xl border transition-colors ${theme === 'dark'
-                            ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500'
-                            : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400'
-                            } focus:outline-none focus:border-gray-400`}
+                        className={`w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm transition-colors ${isDark
+                            ? 'bg-gray-900 border-gray-700 text-white placeholder-gray-500 focus:border-gray-500'
+                            : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400 focus:border-gray-300'
+                            } focus:outline-none`}
                     />
                 </div>
                 <button
                     onClick={handleCreate}
-                    className="px-6 py-3 bg-black dark:bg-white text-white dark:text-black rounded-xl font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all"
+                    style={{ backgroundColor: '#0a84ff', color: '#fff' }}
                 >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
                     </svg>
                     Create Client
                 </button>
             </div>
 
-            {/* Error Message */}
             {error && (
-                <div className="p-4 rounded-xl bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400">
+                <div className="p-4 rounded-xl text-sm" style={{ backgroundColor: 'rgba(255,69,58,0.1)', color: '#ff453a' }}>
                     {error}
                 </div>
             )}
 
-            {/* Clients Table */}
-            <div className={`rounded-[2rem] border shadow-sm overflow-hidden ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'
-                }`}>
+            {/* Table */}
+            <div className={`rounded-2xl border overflow-hidden ${isDark ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-100'}`}>
                 {isLoading ? (
-                    <div className="p-12 text-center">
-                        <p className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}>
-                            Loading clients...
-                        </p>
+                    <div className="p-16 flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: '#0a84ff' }} />
                     </div>
                 ) : filteredClients.length === 0 ? (
-                    <div className="p-12 text-center">
-                        <p className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}>
-                            {searchTerm ? 'No clients found matching your search' : 'No clients found'}
+                    <div className="p-16 text-center">
+                        <svg className="w-12 h-12 mx-auto mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                        <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                            {searchTerm ? 'No clients match your search' : 'No clients found'}
                         </p>
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full">
-                            <thead className={theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'}>
-                                <tr>
-                                    <th className={`px-6 py-4 text-left text-xs font-bold uppercase tracking-wider ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
-                                        }`}>
-                                        Name
-                                    </th>
-                                    <th className={`px-6 py-4 text-left text-xs font-bold uppercase tracking-wider ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
-                                        }`}>
-                                        Type
-                                    </th>
-                                    <th className={`px-6 py-4 text-left text-xs font-bold uppercase tracking-wider ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
-                                        }`}>
-                                        Country
-                                    </th>
-                                    <th className={`px-6 py-4 text-left text-xs font-bold uppercase tracking-wider ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
-                                        }`}>
-                                        Contact
-                                    </th>
-                                    <th className={`px-6 py-4 text-left text-xs font-bold uppercase tracking-wider ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
-                                        }`}>
-                                        Status
-                                    </th>
-                                    <th className={`px-6 py-4 text-right text-xs font-bold uppercase tracking-wider ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
-                                        }`}>
-                                        Actions
-                                    </th>
+                            <thead>
+                                <tr className={`border-b ${isDark ? 'border-gray-800' : 'border-gray-100'}`}>
+                                    {['Name', 'Type', 'Country', 'Contact', 'Status', 'Actions'].map((h, i) => (
+                                        <th key={h} className={`px-5 py-3.5 text-xs font-semibold uppercase tracking-wider ${i === 5 ? 'text-right' : 'text-left'} ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                                            {h}
+                                        </th>
+                                    ))}
                                 </tr>
                             </thead>
-                            <tbody className={`divide-y ${theme === 'dark' ? 'divide-gray-700' : 'divide-gray-100'}`}>
-                                {filteredClients.map((client) => (
+                            <tbody>
+                                {filteredClients.map((client, idx) => (
                                     <tr
                                         key={client.id}
-                                        className={`transition-colors ${theme === 'dark' ? 'hover:bg-gray-700/30' : 'hover:bg-gray-50'
+                                        className={`border-b transition-colors ${isDark
+                                            ? `border-gray-800/60 ${idx % 2 === 0 ? '' : 'bg-white/[0.02]'} hover:bg-white/5`
+                                            : `border-gray-50 ${idx % 2 === 0 ? '' : 'bg-gray-50/50'} hover:bg-gray-50`
                                             }`}
                                     >
-                                        <td className={`px-6 py-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'
-                                            } font-medium`}>
-                                            {client.name}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className={`inline-flex px-3 py-1 rounded-full text-xs font-bold capitalize ${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-800'
-                                                }`}>
-                                                {client.type}
-                                            </span>
-                                        </td>
-                                        <td className={`px-6 py-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
-                                            }`}>
-                                            {client.country?.name || 'N/A'}
-                                        </td>
-                                        <td className={`px-6 py-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
-                                            }`}>
-                                            <div className="text-sm">
-                                                {client.contact_person && <div>{client.contact_person}</div>}
-                                                {client.contact_email && <div className="text-xs">{client.contact_email}</div>}
+                                        {/* Name */}
+                                        <td className="px-5 py-3.5">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
+                                                    style={{ backgroundColor: typeConfig[client.type]?.color ?? '#8e8e93' }}>
+                                                    {client.name.charAt(0).toUpperCase()}
+                                                </div>
+                                                <span className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{client.name}</span>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <span className={`inline-flex px-3 py-1 rounded-full text-xs font-bold ${client.is_active
-                                                ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
-                                                : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
-                                                }`}>
+                                        {/* Type */}
+                                        <td className="px-5 py-3.5">
+                                            <TypeBadge type={client.type} />
+                                        </td>
+                                        {/* Country */}
+                                        <td className={`px-5 py-3.5 text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                                            {client.country?.name || <span className="text-gray-400">—</span>}
+                                        </td>
+                                        {/* Contact */}
+                                        <td className="px-5 py-3.5">
+                                            <div className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                                                {client.contact_person && <div className="font-medium">{client.contact_person}</div>}
+                                                {client.contact_email && <div className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>{client.contact_email}</div>}
+                                                {!client.contact_person && !client.contact_email && <span className="text-gray-400">—</span>}
+                                            </div>
+                                        </td>
+                                        {/* Status */}
+                                        <td className="px-5 py-3.5">
+                                            <span
+                                                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold"
+                                                style={client.is_active
+                                                    ? { color: '#30d158', backgroundColor: 'rgba(48,209,88,0.12)' }
+                                                    : { color: '#ff453a', backgroundColor: 'rgba(255,69,58,0.12)' }
+                                                }
+                                            >
+                                                <span className="w-1.5 h-1.5 rounded-full inline-block" style={{ backgroundColor: client.is_active ? '#30d158' : '#ff453a' }} />
                                                 {client.is_active ? 'Active' : 'Inactive'}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 text-right space-x-2">
-                                            <button
-                                                onClick={() => handleEdit(client)}
-                                                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${theme === 'dark'
-                                                    ? 'bg-gray-700 text-white hover:bg-gray-600'
-                                                    : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
-                                                    }`}
-                                            >
-                                                Edit
-                                            </button>
-                                            <button
-                                                onClick={() => handleToggleActive(client.id)}
-                                                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${client.is_active
-                                                    ? 'bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-900/50'
-                                                    : 'bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-300 dark:hover:bg-green-900/50'
-                                                    }`}
-                                            >
-                                                {client.is_active ? 'Deactivate' : 'Activate'}
-                                            </button>
-                                            <button
-                                                onClick={() => handleViewTransactions(client)}
-                                                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${theme === 'dark'
-                                                    ? 'bg-blue-900/30 text-blue-300 hover:bg-blue-900/50'
-                                                    : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                                                    }`}
-                                            >
-                                                View History
-                                            </button>
+                                        {/* Actions */}
+                                        <td className="px-5 py-3.5 text-right">
+                                            <div className="flex items-center justify-end gap-1.5">
+                                                <button
+                                                    onClick={() => handleEdit(client)}
+                                                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${isDark ? 'bg-gray-800 text-gray-200 hover:bg-gray-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                                                >
+                                                    Edit
+                                                </button>
+                                                <button
+                                                    onClick={() => handleViewTransactions(client)}
+                                                    className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors"
+                                                    style={{ backgroundColor: 'rgba(10,132,255,0.12)', color: '#0a84ff' }}
+                                                >
+                                                    History
+                                                </button>
+                                                <button
+                                                    onClick={() => handleToggleActive(client.id)}
+                                                    className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors"
+                                                    style={client.is_active
+                                                        ? { backgroundColor: 'rgba(255,69,58,0.12)', color: '#ff453a' }
+                                                        : { backgroundColor: 'rgba(48,209,88,0.12)', color: '#30d158' }
+                                                    }
+                                                >
+                                                    {client.is_active ? 'Deactivate' : 'Activate'}
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
+                        <div className={`px-5 py-3 text-xs ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                            Showing {filteredClients.length} of {clients.length} clients
+                        </div>
                     </div>
                 )}
             </div>
 
-            {/* Client Form Modal */}
             <ClientFormModal
                 isOpen={isFormModalOpen}
                 onClose={() => setIsFormModalOpen(false)}
@@ -281,7 +334,6 @@ export const ClientManagement = () => {
                 mode={modalMode}
             />
 
-            {/* Transaction History Modal */}
             <TransactionHistoryModal
                 isOpen={isHistoryModalOpen}
                 onClose={() => setIsHistoryModalOpen(false)}

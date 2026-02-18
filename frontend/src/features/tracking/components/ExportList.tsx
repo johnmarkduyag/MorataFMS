@@ -5,10 +5,8 @@ import { useCreateExport } from '../hooks/useCreateExport';
 import { useExports } from '../hooks/useExports';
 import { useExportStats } from '../hooks/useExportStats';
 import type { CreateExportPayload, ExportTransaction, LayoutContext } from '../types';
-import { CalendarCard } from './CalendarCard';
 import { CancelTransactionModal } from './CancelTransactionModal';
 import { EncodeModal } from './EncodeModal';
-import { StatusChart } from './StatusChart';
 
 import { Icon } from '../../../components/Icon';
 import { Pagination } from '../../../components/Pagination';
@@ -21,7 +19,7 @@ export const ExportList = () => {
     const cancelExport = useCancelExport();
     const [cancelTarget, setCancelTarget] = useState<{ id: number; ref: string } | null>(null);
 
-    const { user, dateTime } = useOutletContext<LayoutContext>();
+    const { user } = useOutletContext<LayoutContext>();
 
     const [searchQuery, setSearchQuery] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -29,7 +27,7 @@ export const ExportList = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const page = parseInt(searchParams.get('page') || '1');
     const perPage = parseInt(searchParams.get('per_page') || '10');
-    
+
     const setPage = (newPage: number) => {
         setSearchParams((prev: URLSearchParams) => {
             prev.set('page', String(newPage));
@@ -82,12 +80,7 @@ export const ExportList = () => {
     // Use stats API for accurate total counts (not just current page)
     const { data: stats } = useExportStats();
 
-    const chartData = [
-        { label: 'Shipped', value: stats?.completed || 0, color: '#4cd964' },
-        { label: 'Processing', value: stats?.pending || 0, color: '#ffcc00' },
-        { label: 'Delayed', value: stats?.cancelled || 0, color: '#ff2d55' },
-        { label: 'In Transit', value: stats?.in_progress || 0, color: '#00d2ff' },
-    ];
+
 
     // Server-side filtering is now handled by the API
     const filteredData = data;
@@ -109,35 +102,53 @@ export const ExportList = () => {
                 user={user || null}
             />
 
-            {/* Stats Row - 3 Columns */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
-                {/* 1. Time Card */}
-                <div className="bg-surface-tint rounded-[2rem] p-5 border border-border-tint shadow-sm flex flex-col items-center justify-center text-center h-full transition-all duration-300 ease-in-out">
-                    <h2 className="text-4xl font-bold text-text-primary mb-1 tracking-tight">
-                        {dateTime.time}
-                    </h2>
-                    <p className="text-sm text-text-secondary font-medium mb-4">
-                        {dateTime.date}
-                    </p>
-                    <div className="w-full border-t border-border-tint my-2"></div>
-                    <div className="flex items-center gap-2 mt-2 text-text-secondary font-bold text-xs">
-                        <svg className="w-4 h-4 text-[#c41e3a]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        Manila, Philippines
+            {/* Stats Row - Apple Icon Tiles */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                {[
+                    {
+                        label: 'Total',
+                        value: (stats?.completed ?? 0) + (stats?.pending ?? 0) + (stats?.in_progress ?? 0) + (stats?.cancelled ?? 0),
+                        sub: 'All shipments',
+                        color: '#0a84ff',
+                        icon: 'M12 19l9 2-9-18-9 18 9-2zm0 0v-8',
+                    },
+                    {
+                        label: 'Shipped',
+                        value: stats?.completed ?? 0,
+                        sub: 'Completed',
+                        color: '#30d158',
+                        icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
+                    },
+                    {
+                        label: 'In Transit',
+                        value: stats?.in_progress ?? 0,
+                        sub: 'En route',
+                        color: '#64d2ff',
+                        icon: 'M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0',
+                    },
+                    {
+                        label: 'Processing',
+                        value: stats?.pending ?? 0,
+                        sub: 'Preparing',
+                        color: '#ff9f0a',
+                        icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
+                    },
+                ].map(stat => (
+                    <div key={stat.label} className="bg-surface-tint rounded-[1.5rem] p-4 border border-border-tint shadow-sm">
+                        <div className="flex items-start justify-between">
+                            <div>
+                                <p className="text-3xl font-bold tabular-nums text-text-primary">{stat.value}</p>
+                                <p className="text-xs mt-1 text-text-secondary font-medium">{stat.label}</p>
+                            </div>
+                            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${stat.color}22` }}>
+                                <svg className="w-5 h-5" fill="none" stroke={stat.color} viewBox="0 0 24 24" strokeWidth={1.8}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d={stat.icon} />
+                                </svg>
+                            </div>
+                        </div>
+                        <p className="text-xs text-text-muted mt-2">{stat.sub}</p>
                     </div>
-                </div>
-
-                {/* 2. Calendar Card */}
-                <div className="h-full">
-                    <CalendarCard />
-                </div>
-
-                {/* 3. Status Chart */}
-                <div className="h-full">
-                    <StatusChart data={chartData} />
-                </div>
+                ))}
             </div>
 
             {/* Controls Bar Above the List Card */}
@@ -178,7 +189,7 @@ export const ExportList = () => {
                                     </div>
                                 ))}
                                 {statusFilter && (
-                                    <div 
+                                    <div
                                         className="px-4 py-2 hover:bg-red-50 cursor-pointer text-sm text-red-600 font-bold border-t border-border"
                                         onClick={() => {
                                             setStatusFilter('');
@@ -244,11 +255,10 @@ export const ExportList = () => {
                                     </button>
                                     {/* Cancel button — always visible, disabled for non-cancellable */}
                                     <button
-                                        className={`p-1.5 rounded-md transition-colors ${
-                                            row.status === 'Processing' || row.status === 'In Transit'
+                                        className={`p-1.5 rounded-md transition-colors ${row.status === 'Processing' || row.status === 'In Transit'
                                                 ? 'text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/30 cursor-pointer'
                                                 : 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
-                                        }`}
+                                            }`}
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             if (row.status === 'Processing' || row.status === 'In Transit') {
