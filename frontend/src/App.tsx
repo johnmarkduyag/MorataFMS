@@ -2,7 +2,8 @@ import { Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './features/auth';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthPage } from './features/auth/components/AuthPage';
-import { Documents, ExportList, ImportList, MainLayout, Profile, TrackingDetails } from './features/tracking';
+import { AdminDashboard, Documents, ExportList, ImportList, MainLayout, Profile, TrackingDetails } from './features/tracking';
+import { UserManagement, ClientManagement, TransactionOversight, ReportsAnalytics, AuditLogs } from './features/admin';
 import NotFoundPage from './components/NotFoundPage';
 import LandingPage from './components/LandingPage';
 
@@ -17,7 +18,17 @@ function App() {
 
           {/* Tracking Routes */}
           <Route element={<MainLayout />}>
-            <Route path="/dashboard" element={<ImportList />} />
+            {/* Admin Routes */}
+            <Route path="/dashboard" element={<AdminDashboard />} />
+            <Route path="/users" element={<UserManagement />} />
+            <Route path="/clients" element={<ClientManagement />} />
+            <Route path="/transactions" element={<TransactionOversight />} />
+            <Route path="/reports" element={<ReportsAnalytics />} />
+            <Route path="/audit-logs" element={<AuditLogs />} />
+            <Route path="/settings" element={<NotFoundPage />} />
+
+            {/* Encoder Routes */}
+            <Route path="/imports" element={<ImportList />} />
             <Route path="/export" element={<ExportList />} />
             <Route path="/documents" element={<Documents />} />
             <Route path="/profile" element={<Profile />} />

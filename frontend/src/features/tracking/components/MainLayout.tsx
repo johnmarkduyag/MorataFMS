@@ -50,12 +50,24 @@ export const MainLayout = () => {
         }
     };
 
-    const navItems = [
+    const adminItems = [
+        { label: 'Dashboard', path: '/dashboard', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z' },
+        { label: 'User Management', path: '/users', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z' },
+        { label: 'Client Management', path: '/clients', icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' },
+        { label: 'Transaction Oversight', path: '/transactions', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4' },
+        { label: 'Reports & Analytics', path: '/reports', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
+        { label: 'Audit Logs', path: '/audit-logs', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01' },
+        { label: 'System Settings', path: '/settings', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z' },
+    ];
+
+    const encoderItems = [
         { label: 'Tracking', path: '/tracking', icon: 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z' },
-        { label: 'Import List', path: '/dashboard', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01' },
+        { label: 'Import List', path: '/imports', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01' },
         { label: 'Export List', path: '/export', icon: 'M12 19l9 2-9-18-9 18 9-2zm0 0v-8' },
         { label: 'Documents', path: '/documents', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
     ];
+
+    const navItems = user?.email === 'admin@morata.com' ? adminItems : encoderItems;
 
     const settingsItems = [
         { label: 'Profile', path: '/profile', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' },
@@ -70,7 +82,7 @@ export const MainLayout = () => {
             }`}>
 
             {/* Sidebar */}
-            <aside className={`w-56 h-full flex flex-col overflow-y-auto py-6 px-4 shrink-0 ${isDetailsPage ? 'fixed z-10' : ''} ${theme === 'dark' || theme === 'mix' ? 'bg-black' : 'bg-white'
+            <aside className={`w-72 h-full flex flex-col overflow-y-auto py-6 px-4 shrink-0 ${isDetailsPage ? 'fixed z-10' : ''} ${theme === 'dark' || theme === 'mix' ? 'bg-black' : 'bg-white'
                 }`}>
                 {/* Logo */}
                 <div className="flex items-center gap-2 px-2 mb-8 cursor-pointer" onClick={() => navigate('/')}>
@@ -89,7 +101,7 @@ export const MainLayout = () => {
                             <button
                                 key={item.label}
                                 onClick={() => item.path !== '#' && navigate(item.path)}
-                                className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm transition-all ${location.pathname === item.path
+                                className={`w-full text-left flex items-center gap-3 px-3 py-3 rounded-xl text-sm transition-all whitespace-nowrap ${location.pathname === item.path
                                     ? 'bg-gray-900 text-white dark:bg-zinc-800 dark:text-white shadow-md'
                                     : theme === 'dark' || theme === 'mix'
                                         ? 'text-gray-300 hover:bg-white/5'
@@ -116,7 +128,7 @@ export const MainLayout = () => {
                             <button
                                 key={item.label}
                                 onClick={() => navigate(item.path)}
-                                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm ${location.pathname === item.path
+                                className={`w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm whitespace-nowrap ${location.pathname === item.path
                                     ? theme === 'dark' || theme === 'mix'
                                         ? 'bg-white/10 text-white'
                                         : 'bg-black/10 text-black'
@@ -171,7 +183,7 @@ export const MainLayout = () => {
             </aside >
 
             {/* Main Content Area - Rounded Card Look */}
-            < main className={`flex-1 overflow-y-auto p-8 m-4 rounded-[2.5rem] shadow-2xl relative border ${isDetailsPage ? 'ml-64' : ''} ${theme === 'dark' ? 'bg-black border-transparent' : 'bg-white border-white'
+            < main className={`flex-1 overflow-y-auto p-8 m-4 rounded-[2.5rem] shadow-2xl relative border ${isDetailsPage ? 'ml-80' : ''} ${theme === 'dark' ? 'bg-black border-transparent' : 'bg-white border-white'
                 }`}>
                 {/* Page Content */}
                 < div className="max-w-7xl mx-auto min-h-full flex flex-col" >

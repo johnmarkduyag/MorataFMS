@@ -4,3 +4,4 @@ export { ExportList } from './components/ExportList';
 export { TrackingDetails } from './components/TrackingDetails';
 export { Documents } from './components/Documents';
 export { Profile } from './components/Profile';
+export { AdminDashboard } from './components/AdminDashboard';

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../features/auth';
 
@@ -6,9 +7,39 @@ const LandingPage: React.FC = () => {
     const { user } = useAuth();
 
     // Default values if user is not logged in
-    const userName = user?.name || 'Test User';
+    const userName = user?.name === 'Admin User' ? 'Test User' : (user?.name || 'Test User');
     const userRole = 'Document In Charge';
     const initials = userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+
+    const [showDropdown, setShowDropdown] = useState(false);
+    const { login, logout, setUser } = useAuth();
+
+    const handleSwitchAccount = async (email: string) => {
+        try {
+            await logout();
+            try {
+                await login({ email, password: 'password' });
+            } catch (err) {
+                console.warn('API Login failed, using mock user for demo/testing');
+                const mockUser = {
+                    id: email === 'admin@morata.com' ? 1 : 2,
+                    email: email,
+                    name: email === 'admin@morata.com' ? 'Admin User' : 'Test User',
+                    role: email === 'admin@morata.com' ? 'Admin' : 'Encoder'
+                };
+                setUser(mockUser);
+                localStorage.setItem('user', JSON.stringify(mockUser));
+            }
+
+            if (email === 'admin@morata.com') {
+                navigate('/dashboard');
+            } else {
+                navigate('/imports');
+            }
+        } catch (error) {
+            console.error('Failed to switch account:', error);
+        }
+    };
 
     return (
 
@@ -37,14 +68,55 @@ const LandingPage: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="hidden md:flex items-center gap-6">
-                        <div className="text-right">
-                            <p className="text-base font-bold text-white leading-tight">{userName}</p>
-                            <p className="text-xs text-gray-300 uppercase tracking-wider">{userRole}</p>
-                        </div>
-                        <div className="w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center text-white font-bold text-lg border border-white/20 shadow-lg">
-                            {initials}
-                        </div>
+                    <div className="relative">
+                        <button
+                            onClick={() => setShowDropdown(!showDropdown)}
+                            className="hidden md:flex items-center gap-6 focus:outline-none group"
+                        >
+                            <div className="text-right group-hover:opacity-80 transition-opacity">
+                                <p className="text-base font-bold text-white leading-tight">{userName}</p>
+                                <p className="text-xs text-gray-300 uppercase tracking-wider">{userRole}</p>
+                            </div>
+                            <div className="w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center text-white font-bold text-lg border border-white/20 shadow-lg group-hover:bg-white/20 transition-all">
+                                {initials}
+                            </div>
+                        </button>
+
+                        {showDropdown && (
+                            <div className="absolute right-0 top-full mt-4 w-56 bg-white rounded-2xl shadow-2xl py-2 z-50 overflow-hidden transform origin-top-right transition-all">
+                                <div className="px-4 py-3 border-b border-gray-100">
+                                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Switch Account</p>
+                                </div>
+                                <button
+                                    onClick={() => handleSwitchAccount('admin@morata.com')}
+                                    className="w-full text-left px-4 py-3 hover:bg-black/5 font-bold text-sm text-gray-900 flex items-center gap-3 transition-colors"
+                                >
+                                    <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center">
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p className="leading-none">Admin User</p>
+                                        <p className="text-[10px] text-gray-500 font-normal mt-0.5">Switch to admin view</p>
+                                    </div>
+                                </button>
+                                <button
+                                    onClick={() => handleSwitchAccount('test@morata.com')}
+                                    className="w-full text-left px-4 py-3 hover:bg-black/5 font-bold text-sm text-gray-900 flex items-center gap-3 transition-colors"
+                                >
+                                    <div className="w-8 h-8 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center">
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p className="leading-none">Test User</p>
+                                        <p className="text-[10px] text-gray-500 font-normal mt-0.5">Switch to user view</p>
+                                    </div>
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     <div className="md:hidden">
