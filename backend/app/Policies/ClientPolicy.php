@@ -16,6 +16,14 @@ class ClientPolicy
     }
 
     /**
+     * Any authenticated user can view a single client.
+     */
+    public function view(User $user, Client $client): bool
+    {
+        return true;
+    }
+
+    /**
      * Only supervisor+ can create clients.
      */
     public function create(User $user): bool

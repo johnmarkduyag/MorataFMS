@@ -29,7 +29,10 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
     Route::patch('export-transactions/{export_transaction}/cancel', [ExportTransactionController::class, 'cancel']);
     Route::apiResource('import-transactions', ImportTransactionController::class)->only(['index', 'store', 'destroy']);
     Route::apiResource('export-transactions', ExportTransactionController::class)->only(['index', 'store', 'destroy']);
-    Route::get('/clients', [ClientController::class, 'index']);
+    Route::apiResource('clients', ClientController::class);
+    Route::post('clients/{client}/toggle-active', [ClientController::class, 'toggleActive']);
+    Route::get('clients/{client}/transactions', [ClientController::class, 'transactions']);
+
     Route::get('/countries', [CountryController::class, 'index']);
 
     // Admin-only: User management
