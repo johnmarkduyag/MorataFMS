@@ -112,7 +112,7 @@ export const MainLayout = () => {
     );
 
     return (
-        <div className={`h-screen flex overflow-hidden ${isContentDark ? 'bg-black' : 'bg-gray-100'}`}>
+        <div className={`h-screen flex overflow-hidden ${isContentDark ? 'bg-[#111111]' : 'bg-white'}`}>
 
             {/* Sidebar — always dark in mix/dark, light in light */}
             <aside
@@ -195,11 +195,11 @@ export const MainLayout = () => {
                 </div>
             </aside>
 
-            {/* Main Content Area — dark grey card in dark, white in light */}
-            <main className={`flex-1 overflow-y-auto p-6 m-3 rounded-2xl relative border ${isDetailsPage ? 'ml-64' : ''
+            {/* Main Content Area — flush, no gap, no rounded corners */}
+            <main className={`flex-1 overflow-y-auto p-6 relative ${isDetailsPage ? 'ml-64' : ''
                 } ${isContentDark
-                    ? 'bg-[#111111] border-[#2a2a2a] shadow-[0_8px_32px_rgba(0,0,0,0.6)]'
-                    : 'bg-white border-black/5 shadow-sm'
+                    ? 'bg-[#111111]'
+                    : 'bg-white'
                 }`}>
                 <div className="max-w-7xl mx-auto min-h-full flex flex-col">
                     <Outlet context={{ user, dateTime }} />
