@@ -23,8 +23,9 @@ export function RoleRedirect() {
 
   // Route to correct dashboard based on role
   if (user?.role === 'admin') {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/transactions" replace />;
   }
 
-  return <Navigate to="/dashboard" replace />;
+  // Encoders, brokers, supervisors, managers → tracking dashboard
+  return <Navigate to="/tracking" replace />;
 }

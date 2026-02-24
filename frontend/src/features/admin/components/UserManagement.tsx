@@ -9,42 +9,50 @@ interface LayoutContext {
     dateTime: { time: string; date: string };
 }
 
-const roleConfig: Record<string, { label: string; color: string; icon: string }> = {
+const roleConfig: Record<string, { label: string; color: string; gradient: string; icon: string }> = {
     admin: {
         label: 'Admin',
-        color: '#bf5af2',
+        color: '#ff375f',
+        gradient: 'linear-gradient(135deg, #ff375f 0%, #ff2d55 100%)',
         icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z',
     },
     manager: {
         label: 'Manager',
         color: '#0a84ff',
+        gradient: 'linear-gradient(135deg, #0a84ff 0%, #007aff 100%)',
         icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
     },
     supervisor: {
         label: 'Supervisor',
         color: '#30d158',
+        gradient: 'linear-gradient(135deg, #30d158 0%, #28cd41 100%)',
         icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4',
     },
     broker: {
         label: 'Broker',
         color: '#ff9f0a',
+        gradient: 'linear-gradient(135deg, #ff9f0a 0%, #ff8800 100%)',
         icon: 'M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
     },
     encoder: {
         label: 'Encoder',
-        color: '#64d2ff',
+        color: '#0a84ff',
+        gradient: 'linear-gradient(135deg, #0a84ff 0%, #007aff 100%)',
         icon: 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z',
     },
 };
 
 function RoleBadge({ role }: { role: string }) {
-    const cfg = roleConfig[role] ?? { label: role, color: '#8e8e93', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' };
+    const cfg = roleConfig[role] ?? { label: role, color: '#8e8e93', gradient: 'linear-gradient(135deg, #8e8e93 0%, #636366 100%)', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' };
     return (
         <span
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold"
-            style={{ color: cfg.color, backgroundColor: `${cfg.color}18` }}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
+            style={{
+                color: cfg.color,
+                backgroundColor: `${cfg.color}15`,
+            }}
         >
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d={cfg.icon} />
             </svg>
             {cfg.label}
@@ -176,6 +184,7 @@ export const UserManagement = () => {
                 ))}
             </div>
 
+
             {/* Table */}
             <div className="bg-surface rounded-lg border border-border overflow-hidden">
                 {/* Controls - integrated into the card */}
@@ -194,8 +203,7 @@ export const UserManagement = () => {
                     </div>
                     <button
                         onClick={handleCreate}
-                        className="flex items-center gap-1.5 px-3.5 h-9 rounded-md text-xs font-bold transition-all shadow-sm"
-                        style={{ backgroundColor: '#0a84ff', color: '#fff' }}
+                        className="flex items-center gap-1.5 px-3.5 h-9 rounded-md text-xs font-bold transition-all shadow-sm bg-gradient-to-br from-blue-600 to-indigo-700 text-white"
                     >
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />

@@ -21,7 +21,7 @@ api.interceptors.response.use(
 
             if (!isAuthRoute) {
                 localStorage.removeItem('user');
-                window.location.href = '/login';
+                window.location.href = '/';
             }
         }
         return Promise.reject(error);
